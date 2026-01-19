@@ -2,7 +2,7 @@ import { TwitterApi } from 'twitter-api-v2';
 import express from 'express';
 import axios from 'axios';
 import { randomUUID } from 'crypto';
-import { firebaseService } from '../services/firebaseService';
+import { firebaseService } from '../services/firebaseService.js';
 
 const router = express.Router();
 
