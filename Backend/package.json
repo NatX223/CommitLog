@@ -19,7 +19,8 @@
     "firebase-admin": "^12.7.0",
     "joi": "^17.10.1",
     "jsonwebtoken": "^9.0.2",
-    "node-cron": "^3.0.2"
+    "node-cron": "^3.0.2",
+    "twitter-api-v2": "^1.29.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
