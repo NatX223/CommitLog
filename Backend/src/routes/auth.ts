@@ -106,3 +106,5 @@ router.get('/api/auth/callback/x', async (req, res) => {
         res.status(500).json({ error: 'Authentication failed' });
     }
 });
+
+export default router;
