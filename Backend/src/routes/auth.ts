@@ -1,4 +1,3 @@
-// src/routes/auth.js
 import { TwitterApi } from 'twitter-api-v2';
 import express from 'express';
 import axios from 'axios';
