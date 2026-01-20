@@ -1,0 +1,355 @@
+"use client";
+
+import { useState } from "react";
+
+export default function Dashboard() {
+  const [aiInput, setAiInput] = useState("");
+
+  const activityItems = [
+    {
+      time: "09:42 AM",
+      type: "commit",
+      message: 'Committed to main: "Feat: implement rate limiting"',
+      icon: "commit",
+      iconColor: "text-text-muted",
+      dotColor: "bg-dashboard-primary",
+      links: ["GITHUB", "X / TWITTER"],
+      xp: "+50 XP",
+    },
+    {
+      time: "08:15 AM",
+      type: "ai",
+      message: "AI Agent drafted a social post based on 4 commits",
+      icon: "auto_awesome",
+      iconColor: "text-dashboard-primary",
+      dotColor: "bg-dashboard-primary",
+      links: ["X / TWITTER"],
+      status: "DRAFTED",
+    },
+    {
+      time: "Yesterday",
+      type: "goal",
+      message: 'Goal reached: "Complete Database Migration"',
+      icon: "flag",
+      iconColor: "text-amber-500",
+      dotColor: "bg-amber-500",
+      links: ["GITHUB"],
+      xp: "+500 XP",
+      xpColor: "text-amber-600 bg-amber-50",
+    },
+  ];
+
+  const goals = [
+    {
+      title: "User Growth",
+      description: "Reach 100 active beta testers for the platform.",
+      progress: 75,
+      status: "Active",
+      statusColor: "text-dashboard-primary bg-primary-soft",
+      icon: "trending_up",
+      iconBg: "bg-primary-soft",
+      iconColor: "text-dashboard-primary",
+      progressColor: "bg-dashboard-primary",
+    },
+    {
+      title: "API Documentation",
+      description: "Complete Swagger/OpenAPI docs for all endpoints.",
+      progress: 30,
+      status: "On Track",
+      statusColor: "text-text-muted bg-slate-100",
+      icon: "description",
+      iconBg: "bg-slate-50 border border-border-light",
+      iconColor: "text-text-muted",
+      progressColor: "bg-slate-300",
+    },
+    {
+      title: "99.9% Uptime",
+      description: "Maintain high availability during peak traffic windows.",
+      progress: 99,
+      status: "Stable",
+      statusColor: "text-dashboard-primary bg-primary-soft",
+      icon: "speed",
+      iconBg: "bg-primary-soft",
+      iconColor: "text-dashboard-primary",
+      progressColor: "bg-dashboard-primary",
+      healthLabel: "Health",
+      healthValue: "Optimal",
+    },
+  ];
+
+  return (
+    <div className="bg-background-light-dash text-text-charcoal min-h-screen flex overflow-hidden font-space-grotesk">
+      {/* Sidebar */}
+      <aside className="w-64 border-r border-border-light flex flex-col h-screen bg-white shrink-0">
+        <div className="p-6 flex items-center gap-3">
+          <div className="w-10 h-10 bg-dashboard-primary rounded-lg flex items-center justify-center">
+            <span className="material-symbols-outlined text-white font-bold">
+              terminal
+            </span>
+          </div>
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-text-charcoal">
+              CommitLog
+            </h1>
+            <p className="text-[10px] text-dashboard-primary font-bold tracking-widest uppercase">
+              Build in Public
+            </p>
+          </div>
+        </div>
+
+        <nav className="flex-1 px-4 space-y-1 mt-4">
+          <a
+            className="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary-soft text-dashboard-primary border border-dashboard-primary/10"
+            href="#"
+          >
+            <span className="material-symbols-outlined">dashboard</span>
+            <span className="font-semibold text-sm tracking-wide">
+              Dashboard
+            </span>
+          </a>
+          <a
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-slate-50 hover:text-text-charcoal transition-all"
+            href="#"
+          >
+            <span className="material-symbols-outlined">track_changes</span>
+            <span className="font-medium text-sm tracking-wide">Goals</span>
+          </a>
+          <a
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-slate-50 hover:text-text-charcoal transition-all"
+            href="#"
+          >
+            <span className="material-symbols-outlined">forum</span>
+            <span className="font-medium text-sm tracking-wide">Chat</span>
+          </a>
+          <a
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-slate-50 hover:text-text-charcoal transition-all"
+            href="#"
+          >
+            <span className="material-symbols-outlined">insights</span>
+            <span className="font-medium text-sm tracking-wide">Progress</span>
+          </a>
+          <a
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-slate-50 hover:text-text-charcoal transition-all"
+            href="#"
+          >
+            <span className="material-symbols-outlined">settings</span>
+            <span className="font-medium text-sm tracking-wide">Settings</span>
+          </a>
+        </nav>
+
+        <div className="p-4 mt-auto">
+          <button className="w-full bg-dashboard-primary text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:opacity-90 transition-opacity card-shadow">
+            <span className="material-symbols-outlined text-[20px]">
+              add_circle
+            </span>
+            <span>Manual Log</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
+        {/* Header */}
+        <header className="h-20 bg-white border-b border-border-light flex items-center justify-between px-8 shrink-0">
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-bold text-text-charcoal">
+              Main Dashboard
+            </h2>
+          </div>
+          <div className="flex items-center gap-6">
+            <button className="relative p-2 text-text-muted hover:text-text-charcoal">
+              <span className="material-symbols-outlined">notifications</span>
+              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-dashboard-primary rounded-full"></span>
+            </button>
+            <div className="h-8 w-px bg-border-light"></div>
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <p className="text-sm font-bold text-text-charcoal">
+                  The Architect
+                </p>
+                <p className="text-[10px] text-dashboard-primary uppercase tracking-widest font-black">
+                  Level 12
+                </p>
+              </div>
+              <div className="w-10 h-10 rounded-full border-2 border-dashboard-primary/20 p-0.5">
+                <div className="w-full h-full rounded-full bg-gray-300"></div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-8 pb-32">
+          <div className="max-w-6xl mx-auto space-y-8">
+            {/* Activity Stream */}
+            <section className="bg-white border border-border-light rounded-3xl p-6 card-shadow">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="text-xl font-bold text-text-charcoal uppercase tracking-tight flex items-center gap-2">
+                  <span className="material-symbols-outlined text-dashboard-primary">
+                    history
+                  </span>
+                  Activity Stream
+                </h3>
+                <div className="flex gap-2">
+                  <button className="px-3 py-1.5 rounded-lg bg-slate-50 border border-border-light text-[10px] font-bold text-text-muted hover:border-dashboard-primary transition-colors uppercase">
+                    Filter: All
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                {activityItems.map((item, index) => (
+                  <div
+                    key={index}
+                    className="grid grid-cols-12 gap-4 py-5 px-4 hover:bg-slate-50 rounded-2xl transition-all border-b border-slate-50 last:border-none"
+                  >
+                    <div className="col-span-2 flex items-center gap-3">
+                      <div
+                        className={`w-2 h-2 rounded-full ${item.dotColor}`}
+                      ></div>
+                      <span className="text-xs font-mono text-text-muted tracking-tighter uppercase font-semibold">
+                        {item.time}
+                      </span>
+                    </div>
+                    <div className="col-span-6">
+                      <p className="text-sm font-medium text-text-charcoal flex items-center gap-2">
+                        <span
+                          className={`material-symbols-outlined text-[16px] ${item.iconColor}`}
+                        >
+                          {item.icon}
+                        </span>
+                        {item.type === "commit" ? (
+                          <>
+                            Committed to{" "}
+                            <code className="text-dashboard-primary bg-primary-soft px-1 rounded font-bold">
+                              main
+                            </code>
+                            : "Feat: implement rate limiting"
+                          </>
+                        ) : (
+                          item.message
+                        )}
+                      </p>
+                    </div>
+                    <div className="col-span-4 flex items-center justify-end gap-3">
+                      {item.links?.map((link, linkIndex) => (
+                        <a
+                          key={linkIndex}
+                          className="flex items-center gap-1.5 text-[10px] font-bold text-text-muted hover:text-dashboard-primary bg-slate-100 px-3 py-1.5 rounded-lg transition-colors"
+                          href="#"
+                        >
+                          <span className="material-symbols-outlined text-[14px]">
+                            {link.includes("GITHUB") ? "link" : "share"}
+                          </span>
+                          {link}
+                        </a>
+                      ))}
+                      {item.status && (
+                        <span className="text-[10px] font-bold text-dashboard-primary bg-primary-soft px-2 py-1.5 rounded-lg tracking-widest uppercase">
+                          {item.status}
+                        </span>
+                      )}
+                      {item.xp && (
+                        <span
+                          className={`text-[10px] font-bold px-2 py-1.5 rounded-lg tracking-widest ${
+                            item.xpColor ||
+                            "text-dashboard-primary bg-primary-soft"
+                          }`}
+                        >
+                          {item.xp}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Goals Section */}
+            <section className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold text-text-charcoal uppercase tracking-tight flex items-center gap-2">
+                  <span className="material-symbols-outlined text-dashboard-primary">
+                    target
+                  </span>
+                  Goals
+                </h3>
+                <button className="bg-dashboard-primary text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 hover:opacity-90 transition-all card-shadow">
+                  <span className="material-symbols-outlined text-[16px]">
+                    add
+                  </span>
+                  Create Goal
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {goals.map((goal, index) => (
+                  <div
+                    key={index}
+                    className="bg-white border border-border-light rounded-2xl p-5 card-shadow"
+                  >
+                    <div className="flex justify-between items-start mb-4">
+                      <div className={`p-2 rounded-lg ${goal.iconBg}`}>
+                        <span
+                          className={`material-symbols-outlined text-[20px] ${goal.iconColor}`}
+                        >
+                          {goal.icon}
+                        </span>
+                      </div>
+                      <span
+                        className={`text-[10px] font-bold px-2 py-1 rounded ${goal.statusColor}`}
+                      >
+                        {goal.status}
+                      </span>
+                    </div>
+                    <h4 className="font-bold text-text-charcoal mb-1">
+                      {goal.title}
+                    </h4>
+                    <p className="text-xs text-text-muted mb-4 leading-relaxed">
+                      {goal.description}
+                    </p>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-[10px] font-bold uppercase text-text-muted">
+                        <span>{goal.healthLabel || "Progress"}</span>
+                        <span>{goal.healthValue || `${goal.progress}%`}</span>
+                      </div>
+                      <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${goal.progressColor}`}
+                          style={{ width: `${goal.progress}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
+        </div>
+
+        {/* AI Input Bar */}
+        <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background-light-dash via-background-light-dash to-transparent">
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white border border-border-light rounded-2xl p-2 card-shadow flex items-center gap-3">
+              <div className="w-10 h-10 bg-primary-soft rounded-xl flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-dashboard-primary">
+                  smart_toy
+                </span>
+              </div>
+              <input
+                className="flex-1 border-none focus:ring-0 text-sm text-text-charcoal placeholder:text-text-muted bg-transparent"
+                placeholder="Ask AI agent to draft a log or analyze recent commits..."
+                type="text"
+                value={aiInput}
+                onChange={(e) => setAiInput(e.target.value)}
+              />
+              <button className="bg-dashboard-primary text-white p-2 rounded-xl hover:opacity-90 transition-opacity">
+                <span className="material-symbols-outlined">arrow_upward</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}

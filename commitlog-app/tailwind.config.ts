@@ -16,10 +16,19 @@ const config: Config = {
         brand: {
           text: "#101915",
           muted: "#578e77",
-        }
+        },
+        // Dashboard specific colors
+        "dashboard-primary": "#10b981",
+        "primary-soft": "#ecfdf5",
+        "background-light-dash": "#f8fafc",
+        "surface": "#ffffff",
+        "border-light": "#e2e8f0",
+        "text-charcoal": "#334155",
+        "text-muted": "#64748b",
       },
       fontFamily: {
         display: ["var(--font-manrope)", "Manrope", "sans-serif"],
+        "space-grotesk": ["Space Grotesk", "sans-serif"],
       },
       borderRadius: {
         DEFAULT: "0.25rem",

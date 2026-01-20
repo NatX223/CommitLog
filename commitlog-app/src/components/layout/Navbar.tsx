@@ -20,9 +20,9 @@ const Navbar: React.FC = () => {
 
         <div className="flex items-center gap-4">
           <button className="hidden sm:block text-sm font-bold">Log in</button>
-          <button className="bg-primary text-[#101915] px-5 py-2 rounded-lg text-sm font-bold soft-shadow hover:brightness-105 transition-all">
+          {/* <button className="bg-primary text-[#101915] px-5 py-2 rounded-lg text-sm font-bold soft-shadow hover:brightness-105 transition-all">
             Get Started
-          </button>
+          </button> */}
         </div>
       </div>
     </header>

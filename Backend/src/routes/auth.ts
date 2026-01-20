@@ -6,7 +6,7 @@ import { firebaseService } from '../services/firebaseService.js';
 
 const router = express.Router();
 
-const oauthStates = new Map<string, { walletAddress: string; provider: string; timestamp: number }>();
+const oauthStates = new Map<string, { timestamp: number }>();
 
 setInterval(() => {
     const now = Date.now();
@@ -25,6 +25,113 @@ interface tempAuth {
 const client = new TwitterApi({
     clientId: process.env.X_CLIENT_ID!,
     clientSecret: process.env.X_CLIENT_SECRET
+});
+
+router.post('/api/auth/signup', async (req, res) => {
+    try {
+        const { provider } = req.body;
+
+        if (provider !== 'github') {
+            return res.status(400).json({
+                success: false,
+                error: 'Unsupported provider'
+            });
+        }
+
+        // Generate state parameter for security
+        const state = randomUUID();
+        oauthStates.set(state, {
+            timestamp: Date.now()
+        });
+
+        const clientId = process.env.GITHUB_CLIENT_ID!;
+        const redirectUri = process.env.GITHUB_REDIRECT_URI!;
+        const scope = 'repo read:user user:email';
+        const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}&state=${state}`;
+
+        // Return JSON response instead of redirecting
+        res.json({
+            success: true,
+            redirectUrl: authUrl
+        });
+
+    } catch (error) {
+        console.error('❌ Error initiating github OAuth:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to initiate github OAuth flow',
+            message: error instanceof Error ? error.message : 'Unknown error occurred'
+        });
+    }
+});
+
+router.get('/api/auth/callback/github', async (req, res) => {
+    try {
+        const { code, state } = req.query;
+
+        if (!code || !state) {
+            return res.status(400).json({
+                success: false,
+                error: 'Missing authorization code or state'
+            });
+        }
+
+        oauthStates.delete(state as string);
+
+        // Exchange code for access token
+        const tokenResponse = await axios.post('https://github.com/login/oauth/access_token', {
+            client_id: process.env.GITHUB_CLIENT_ID,
+            client_secret: process.env.GITHUB_CLIENT_SECRET,
+            code: code as string
+        }, {
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        const accessToken = tokenResponse.data.access_token;
+
+        if (!accessToken) {
+            return res.status(400).json({
+                success: false,
+                error: 'Failed to obtain access token'
+            });
+        }
+
+        // Fetch user profile
+        const userResponse = await axios.get('https://api.github.com/user', {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Accept': 'application/vnd.github.v3+json'
+            }
+        });
+
+        const githubUser = userResponse.data;
+
+        const userId = githubUser.id.toString();
+
+        const user = await firebaseService.getDocument('users', userId);
+        if (!user) {
+            const userData = {
+                id: userId,
+                profile: {
+                    displayName: githubUser.login,
+                    avatarUrl: githubUser.avatar_url,
+                    email: githubUser.email
+                },
+                createdAt: new Date(),
+                updatedAt: new Date()
+            }
+            await firebaseService.createDocument('users', userData, userId);
+            console.log(`✅ GitHub connected for user: ${userId}`);
+        }
+
+        res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
+
+    } catch (error) {
+        console.error('❌ Error in GitHub OAuth callback:', error);
+        res.redirect(process.env.FRONTEND_URL!);
+    }
 });
 
 router.post('/api/auth/x', async (req, res) => {
@@ -46,7 +153,7 @@ router.post('/api/auth/x', async (req, res) => {
         );
 
         const tempAuthData = {
-            codeVerifier, 
+            codeVerifier,
             userId: githubId
         };
 
