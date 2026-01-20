@@ -136,16 +136,10 @@ router.get('/api/auth/callback/github', async (req, res) => {
 
 router.post('/api/auth/x', async (req, res) => {
     try {
-        const { githubId } = req.body;
+        // Using hardcoded userId for testing
+        const userId = "66010132";
 
-        if (!githubId) {
-            return res.status(400).json({
-                success: false,
-                error: 'GitHub ID is required'
-            });
-        }
-        const _githubId = githubId.toString();
-        const user = await firebaseService.getDocument('users', _githubId);
+        const user = await firebaseService.getDocument('users', userId);
         if (!user) {
             return res.status(404).json({
                 success: false,
@@ -161,12 +155,16 @@ router.post('/api/auth/x', async (req, res) => {
 
         const tempAuthData = {
             codeVerifier,
-            userId: githubId
+            userId: userId
         };
 
         await firebaseService.createDocument('temp_auth', tempAuthData, state);
 
-        res.redirect(url);
+        // Return the OAuth URL instead of redirecting
+        res.json({
+            success: true,
+            redirectUrl: url
+        });
 
     } catch (error) {
         console.error('❌ Error initiating X OAuth:', error);

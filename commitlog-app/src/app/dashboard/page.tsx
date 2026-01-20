@@ -104,28 +104,24 @@ export default function Dashboard() {
 
   const handleXIntegration = async () => {
     try {
-      // You'll need to get the actual GitHub ID from your auth context/state
-      // For now, using a placeholder - replace with actual user ID
-      const githubId = "66010132"; // Replace with actual GitHub ID from auth context
-      
-      // Create a form and submit it to trigger the redirect
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = 'https://commitlog.up.railway.app/api/auth/x';
-      
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = 'githubId';
-      input.value = githubId;
-      
-      form.appendChild(input);
-      document.body.appendChild(form);
-      form.submit();
-      document.body.removeChild(form);
-      
+      const response = await fetch('https://commitlog.up.railway.app/api/auth/x', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.redirectUrl) {
+          // Navigate to the X OAuth URL
+          window.location.href = data.redirectUrl;
+        }
+      } else {
+        console.error('Failed to initiate X integration');
+      }
     } catch (error) {
       console.error('Error connecting to X:', error);
-      // You could show an error message to the user here
     }
   };
 
