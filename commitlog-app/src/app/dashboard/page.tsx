@@ -4,6 +4,7 @@ import { useState } from "react";
 
 export default function Dashboard() {
   const [aiInput, setAiInput] = useState("");
+  const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
 
   const activityItems = [
     {
@@ -76,6 +77,57 @@ export default function Dashboard() {
       healthValue: "Optimal",
     },
   ];
+
+  const integrations = [
+    {
+      name: "GitHub",
+      icon: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
+      connected: true,
+      isImage: true,
+    },
+    {
+      name: "X (Twitter)",
+      icon: "share",
+      iconColor: "text-[#1DA1F2]",
+      connected: true,
+      isImage: false,
+      clickable: true,
+    },
+    {
+      name: "Notion",
+      icon: "grid_view",
+      iconColor: "text-text-muted",
+      connected: false,
+      isImage: false,
+    },
+  ];
+
+  const handleXIntegration = async () => {
+    try {
+      // You'll need to get the actual GitHub ID from your auth context/state
+      // For now, using a placeholder - replace with actual user ID
+      const githubId = "66010132"; // Replace with actual GitHub ID from auth context
+      
+      // Create a form and submit it to trigger the redirect
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = 'https://commitlog.up.railway.app/api/auth/x';
+      
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'githubId';
+      input.value = githubId;
+      
+      form.appendChild(input);
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
+      
+    } catch (error) {
+      console.error('Error connecting to X:', error);
+      // You could show an error message to the user here
+    }
+  };
 
   return (
     <div className="bg-background-light-dash text-text-charcoal min-h-screen flex overflow-hidden font-space-grotesk">
@@ -162,7 +214,10 @@ export default function Dashboard() {
               <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-dashboard-primary rounded-full"></span>
             </button>
             <div className="h-8 w-px bg-border-light"></div>
-            <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
+              className="flex items-center gap-3 hover:bg-slate-50 p-2 rounded-lg transition-all"
+            >
               <div className="text-right">
                 <p className="text-sm font-bold text-text-charcoal">
                   The Architect
@@ -174,7 +229,7 @@ export default function Dashboard() {
               <div className="w-10 h-10 rounded-full border-2 border-dashboard-primary/20 p-0.5">
                 <div className="w-full h-full rounded-full bg-gray-300"></div>
               </div>
-            </div>
+            </button>
           </div>
         </header>
 
@@ -350,6 +405,108 @@ export default function Dashboard() {
           </div>
         </div>
       </main>
+
+      {/* Right Sidebar */}
+      <aside className={`w-80 border-l border-border-light flex flex-col h-screen bg-white shrink-0 p-8 space-y-8 transition-transform duration-300 ${isRightSidebarOpen ? 'translate-x-0' : 'translate-x-full'} fixed right-0 top-0 z-50 xl:relative xl:translate-x-0 ${isRightSidebarOpen ? 'xl:flex' : 'xl:hidden'}`}>
+        {/* Level Progress */}
+        <div>
+          <h4 className="text-xs font-black text-text-muted uppercase tracking-widest mb-6">Level Progress</h4>
+          <div className="bg-white border border-border-light rounded-2xl p-5 card-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h5 className="text-lg font-bold text-text-charcoal">Level 12</h5>
+                <p className="text-xs text-text-muted">The Architect</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-bold text-dashboard-primary">2,450 XP</p>
+                <p className="text-xs text-text-muted">Next: 3,000 XP</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between text-[10px] font-bold uppercase text-text-muted">
+                <span>Progress to Level 13</span>
+                <span>82%</span>
+              </div>
+              <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-full bg-dashboard-primary rounded-full" style={{ width: '82%' }}></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Streak Status */}
+        <div>
+          <h4 className="text-xs font-black text-text-muted uppercase tracking-widest mb-6">Streak Status</h4>
+          <div className="flex gap-2">
+            <div className="flex-1 aspect-square rounded-xl border border-dashboard-primary/20 bg-primary-soft flex flex-col items-center justify-center card-shadow">
+              <span className="text-2xl font-black text-dashboard-primary">14</span>
+              <span className="text-[10px] font-bold text-text-muted">DAYS</span>
+            </div>
+            <div className="flex-1 aspect-square rounded-xl border border-border-light bg-slate-50 flex flex-col items-center justify-center">
+              <span className="text-2xl font-black text-text-charcoal">42</span>
+              <span className="text-[10px] font-bold text-text-muted">LOGS</span>
+            </div>
+            <div className="flex-1 aspect-square rounded-xl border border-border-light bg-slate-50 flex flex-col items-center justify-center">
+              <span className="text-2xl font-black text-text-charcoal">0</span>
+              <span className="text-[10px] font-bold text-text-muted">LATE</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Integrations */}
+        <div>
+          <h4 className="text-xs font-black text-text-muted uppercase tracking-widest mb-4">Integrations</h4>
+          <div className="space-y-3">
+            {integrations.map((integration, index) => (
+              <div 
+                key={index} 
+                className={`flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-border-light ${!integration.connected ? 'opacity-60' : ''} ${integration.clickable ? 'cursor-pointer hover:bg-slate-100 transition-colors' : ''}`}
+                onClick={integration.clickable && integration.name === 'X (Twitter)' ? handleXIntegration : undefined}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-white border border-border-light flex items-center justify-center">
+                    {integration.isImage ? (
+                      <img className="w-5 h-5" alt={`${integration.name} Logo`} src={integration.icon} />
+                    ) : (
+                      <span className={`material-symbols-outlined text-[18px] ${integration.iconColor}`}>
+                        {integration.icon}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-sm font-semibold">{integration.name}</span>
+                </div>
+                {integration.connected ? (
+                  <span className="w-2 h-2 rounded-full bg-dashboard-primary"></span>
+                ) : (
+                  <span className="text-[10px] font-bold text-text-muted">CONNECT</span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Upgrade Pro */}
+        <div className="mt-auto">
+          <div className="p-6 rounded-2xl bg-primary-soft border border-dashboard-primary/20 relative overflow-hidden group hover:border-dashboard-primary/40 transition-all cursor-pointer">
+            <div className="absolute -right-4 -bottom-4 opacity-5 rotate-12 transition-transform group-hover:scale-110">
+              <span className="material-symbols-outlined text-[100px] text-dashboard-primary">rocket_launch</span>
+            </div>
+            <h5 className="text-text-charcoal font-bold mb-1">Upgrade Pro</h5>
+            <p className="text-xs text-text-muted mb-4">Unlock advanced AI analysis and team collaboration.</p>
+            <button className="text-xs font-black text-dashboard-primary uppercase tracking-widest flex items-center gap-1 group-hover:gap-2 transition-all">
+              Learn more <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* Overlay for mobile */}
+      {isRightSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 xl:hidden"
+          onClick={() => setIsRightSidebarOpen(false)}
+        />
+      )}
     </div>
   );
 }

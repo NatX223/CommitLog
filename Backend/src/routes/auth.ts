@@ -138,7 +138,14 @@ router.post('/api/auth/x', async (req, res) => {
     try {
         const { githubId } = req.body;
 
-        const user = await firebaseService.getDocument('user', githubId);
+        if (!githubId) {
+            return res.status(400).json({
+                success: false,
+                error: 'GitHub ID is required'
+            });
+        }
+        const _githubId = githubId.toString();
+        const user = await firebaseService.getDocument('users', _githubId);
         if (!user) {
             return res.status(404).json({
                 success: false,
@@ -162,7 +169,11 @@ router.post('/api/auth/x', async (req, res) => {
         res.redirect(url);
 
     } catch (error) {
-
+        console.error('❌ Error initiating X OAuth:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to initiate X OAuth flow'
+        });
     }
 });
 
@@ -206,7 +217,7 @@ router.get('/api/auth/callback/x', async (req, res) => {
 
         await firebaseService.deleteDocument('temp_auth', state);
 
-        res.send("Successfully connected X! You can close this window.");
+        res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
     } catch (error) {
         console.error('X OAuth callback error:', error);
         res.status(500).json({ error: 'Authentication failed' });
