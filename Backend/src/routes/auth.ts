@@ -119,6 +119,11 @@ router.get('/api/auth/callback/github', async (req, res) => {
                     avatarUrl: githubUser.avatar_url,
                     email: githubUser.email
                 },
+                connectedAccounts: {
+                    github: {
+                        accessToken: accessToken
+                    }
+                },
                 createdAt: new Date(),
                 updatedAt: new Date()
             }

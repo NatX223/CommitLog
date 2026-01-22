@@ -1,33 +1,39 @@
 import { TwitterApi } from 'twitter-api-v2';
-import { db } from '../config/firebase.js';
+import { firebaseService } from '../../services/firebaseService';
+import userData from "../../types/userSchema";
 
 export class TwitterService {
-  async getValidClient(userId) {
-    const userRef = db.collection('users').doc(userId);
-    const userDoc = await userRef.get();
-    const { xConfig } = userDoc.data();
+  async getValidClient(userId: string) {
+    const userDoc: userData | null = await firebaseService.getDocument('users', userId);
+    if (!userDoc) {
+      throw new Error(`User with ID ${userId} not found`);
+    }
+    if (!userDoc.connectedAccounts.x) {
+      throw new Error(`User ${userId} does not have X account connected`);
+    }
+    const xConfig = userDoc.connectedAccounts.x;
 
     // 1. Check if token is expired or about to expire (within 5 mins)
     const isExpired = Date.now() > (xConfig.expiresAt - 300000);
 
     if (isExpired) {
       console.log("🔄 X Token expired. Refreshing...");
-      
+
       const client = new TwitterApi({
-        clientId: process.env.X_CLIENT_ID,
+        clientId: process.env.X_CLIENT_ID!,
         clientSecret: process.env.X_CLIENT_SECRET,
       });
 
       // 2. Perform the refresh
-      const { client: refreshedClient, accessToken, refreshToken, expiresIn } = 
+      const { client: refreshedClient, accessToken, refreshToken, expiresIn } =
         await client.refreshOAuth2Token(xConfig.refreshToken);
 
       // 3. Update Firestore with new values immediately
-      await userRef.update({
-        'xConfig.accessToken': accessToken,
-        'xConfig.refreshToken': refreshToken,
-        'xConfig.expiresAt': Date.now() + expiresIn * 1000,
-        'xConfig.updatedAt': Date.now(),
+      await firebaseService.updateDocument('users', userId, {
+        'connectedAccounts.x.accessToken': accessToken,
+        'connectedAccounts.x.refreshToken': refreshToken,
+        'connectedAccounts.x.expiresAt': Date.now() + expiresIn * 1000,
+        'connectedAccounts.x.updatedAt': Date.now(),
       });
 
       return refreshedClient.readWrite;
