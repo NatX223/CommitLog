@@ -17,7 +17,7 @@ export const getLatestCommits = tool({
 
       if (!commits || commits.length === 0) {
         return {
-          message: `No commits found in the last ${days} days.`,
+          message: `No commits found in the last day.`,
           post: false
         };
       }
@@ -30,10 +30,8 @@ export const getLatestCommits = tool({
       }));
 
       return {
-        username,
         count: commits.length,
-        latestCommits: formattedCommits,
-        summary: `Found ${commits.length} commits in the last ${days} day(s).`
+        latestCommits: formattedCommits
       };
 
     } catch (error) {
