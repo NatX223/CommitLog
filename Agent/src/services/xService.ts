@@ -1,10 +1,10 @@
 import { TwitterApi } from 'twitter-api-v2';
 import { firebaseService } from './firebaseService';
-import userData from "../types/userSchema";
+import userData from "../models/userSchema";
 
 export class TwitterService {
   async getValidClient(userId: string) {
-    const userDoc: userData | null = await firebaseService.getDocument('users', userId);
+    const userDoc = await firebaseService.getDocument<userData>('users', userId);
     if (!userDoc) {
       throw new Error(`User with ID ${userId} not found`);
     }

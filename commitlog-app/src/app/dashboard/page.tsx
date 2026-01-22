@@ -5,6 +5,10 @@ import { useState } from "react";
 export default function Dashboard() {
   const [aiInput, setAiInput] = useState("");
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   const activityItems = [
     {
@@ -104,7 +108,7 @@ export default function Dashboard() {
 
   const handleXIntegration = async () => {
     try {
-      const response = await fetch('https://commitlog.up.railway.app/api/auth/x', {
+      const response = await fetch(`${backendURL}/api/auth/x`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -242,8 +246,14 @@ export default function Dashboard() {
                   Activity Stream
                 </h3>
                 <div className="flex gap-2">
-                  <button className="px-3 py-1.5 rounded-lg bg-slate-50 border border-border-light text-[10px] font-bold text-text-muted hover:border-dashboard-primary transition-colors uppercase">
-                    Filter: All
+                  <button 
+                    onClick={() => setIsScheduleModalOpen(true)}
+                    className="bg-dashboard-primary text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 hover:opacity-90 transition-all card-shadow"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">
+                      add
+                    </span>
+                    Create Schedule
                   </button>
                 </div>
               </div>
@@ -503,6 +513,224 @@ export default function Dashboard() {
           onClick={() => setIsRightSidebarOpen(false)}
         />
       )}
+
+      {/* Schedule Modal */}
+      {isScheduleModalOpen && (
+        <ScheduleModal 
+          isOpen={isScheduleModalOpen}
+          onClose={() => setIsScheduleModalOpen(false)}
+        />
+      )}
     </div>
+  );
+}
+
+function ScheduleModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
+  const [selectedRepo, setSelectedRepo] = useState("");
+  const [selectedFrequency, setSelectedFrequency] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  // Mock repositories - in real app, fetch from GitHub API
+  const repositories = [
+    { name: "commitlog-app", description: "Main application repository", commits: 142 },
+    { name: "api-backend", description: "Backend API service", commits: 89 },
+    { name: "mobile-app", description: "React Native mobile application", commits: 67 },
+    { name: "docs-site", description: "Documentation website", commits: 34 },
+  ];
+
+  const frequencies = [
+    { id: "daily", label: "Daily", description: "Post every day at 9:00 AM" },
+    { id: "weekly", label: "Weekly", description: "Post every Monday at 9:00 AM" },
+  ];
+
+  const handleFrequencyToggle = (frequencyId: string) => {
+    setSelectedFrequency(prev => 
+      prev.includes(frequencyId) 
+        ? prev.filter(id => id !== frequencyId)
+        : [...prev, frequencyId]
+    );
+  };
+
+  const handleCreateSchedule = async () => {
+    if (!selectedRepo || selectedFrequency.length === 0) return;
+    
+    setIsLoading(true);
+    
+    const response = await fetch(`${backendURL}/api/createSchedule`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId: '66010132', repo: selectedRepo, schedule: selectedFrequency }),
+    });
+
+    if (response.ok) {
+      setIsLoading(false);
+      onClose();
+      
+      // Show success indicator
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+    } else {
+      console.error('Failed to initiate create schedule');
+    }
+  };
+
+  // Success indicator component
+  const SuccessIndicator = () => (
+    <div className={`fixed top-4 right-4 z-[60] bg-green-500 text-white px-4 py-2 rounded-xl flex items-center gap-2 card-shadow transition-all duration-300 ${showSuccess ? 'translate-y-0 opacity-100' : '-translate-y-2 opacity-0'}`}>
+      <span className="material-symbols-outlined text-[18px]">check_circle</span>
+      <span className="font-bold text-sm">Schedule created successfully!</span>
+    </div>
+  );
+
+  if (!isOpen) return null;
+
+  return (
+    <>
+      <SuccessIndicator />
+      <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto card-shadow">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-dashboard-primary rounded-xl flex items-center justify-center">
+              <span className="material-symbols-outlined text-white text-[24px]">schedule</span>
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-text-charcoal">Create Schedule</h2>
+              <p className="text-sm text-text-muted">Automate your commit logs and social posts</p>
+            </div>
+          </div>
+          <button 
+            onClick={onClose}
+            className="p-2 text-text-muted hover:text-text-charcoal hover:bg-slate-50 rounded-xl transition-all"
+          >
+            <span className="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        {/* Repository Selection */}
+        <div className="mb-8">
+          <h3 className="text-lg font-bold text-text-charcoal mb-4 flex items-center gap-2">
+            <span className="material-symbols-outlined text-dashboard-primary">folder</span>
+            Select Repository
+          </h3>
+          <div className="space-y-3">
+            {repositories.map((repo) => (
+              <div
+                key={repo.name}
+                onClick={() => setSelectedRepo(repo.name)}
+                className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                  selectedRepo === repo.name
+                    ? 'border-dashboard-primary bg-primary-soft'
+                    : 'border-border-light hover:border-dashboard-primary/30 hover:bg-slate-50'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                      selectedRepo === repo.name ? 'bg-dashboard-primary' : 'bg-slate-100'
+                    }`}>
+                      <span className={`material-symbols-outlined ${
+                        selectedRepo === repo.name ? 'text-white' : 'text-text-muted'
+                      }`}>
+                        folder_open
+                      </span>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-text-charcoal">{repo.name}</h4>
+                      <p className="text-sm text-text-muted">{repo.description}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-bold text-dashboard-primary">{repo.commits}</p>
+                    <p className="text-xs text-text-muted">commits</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Frequency Selection */}
+        <div className="mb-8">
+          <h3 className="text-lg font-bold text-text-charcoal mb-4 flex items-center gap-2">
+            <span className="material-symbols-outlined text-dashboard-primary">repeat</span>
+            Posting Frequency
+          </h3>
+          <div className="space-y-3">
+            {frequencies.map((frequency) => (
+              <div
+                key={frequency.id}
+                onClick={() => handleFrequencyToggle(frequency.id)}
+                className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                  selectedFrequency.includes(frequency.id)
+                    ? 'border-dashboard-primary bg-primary-soft'
+                    : 'border-border-light hover:border-dashboard-primary/30 hover:bg-slate-50'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                      selectedFrequency.includes(frequency.id) ? 'bg-dashboard-primary' : 'bg-slate-100'
+                    }`}>
+                      <span className={`material-symbols-outlined ${
+                        selectedFrequency.includes(frequency.id) ? 'text-white' : 'text-text-muted'
+                      }`}>
+                        {frequency.id === 'daily' ? 'today' : 'calendar_month'}
+                      </span>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-text-charcoal">{frequency.label}</h4>
+                      <p className="text-sm text-text-muted">{frequency.description}</p>
+                    </div>
+                  </div>
+                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                    selectedFrequency.includes(frequency.id)
+                      ? 'border-dashboard-primary bg-dashboard-primary'
+                      : 'border-border-light'
+                  }`}>
+                    {selectedFrequency.includes(frequency.id) && (
+                      <span className="material-symbols-outlined text-white text-[16px]">check</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 py-3 px-6 rounded-xl border border-border-light text-text-muted font-bold hover:bg-slate-50 transition-all"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleCreateSchedule}
+            disabled={!selectedRepo || selectedFrequency.length === 0 || isLoading}
+            className="flex-1 py-3 px-6 rounded-xl bg-dashboard-primary text-white font-bold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {isLoading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                Creating...
+              </>
+            ) : (
+              <>
+                <span className="material-symbols-outlined text-[18px]">schedule</span>
+                Create Schedule
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+      </div>
+    </>
   );
 }

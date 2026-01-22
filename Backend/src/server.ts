@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.js';
+import scheduleRoutes from './routes/schedule.js';
 
 import admin from 'firebase-admin';
 import { getFirestore } from 'firebase-admin/firestore';
@@ -41,6 +42,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Register routes
 app.use('/', authRoutes);
+app.use('/', scheduleRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
