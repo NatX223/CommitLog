@@ -29,19 +29,39 @@ const client = new TwitterApi({
 
 router.post('/api/auth/signin', async (req, res) => {
     try {
-        const { userId, accessToken, avatarUrl } = req.body;
-        await firebaseService.updateDocument('users', userId, {
-            'connectedAccounts.github': {
-                accessToken
-            },
-            updatedAt: new Date()
-        });
-
-        await firebaseService.updateDocument('users', userId, {
-            'profile': {
-                avatarUrl
+        const { userId, accessToken, avatarUrl, email, displayName } = req.body;
+        const userDoc = await firebaseService.getDocument('users', userId);
+        if (userDoc) {
+            await firebaseService.updateDocument('users', userId, {
+                'connectedAccounts.github': {
+                    accessToken
+                },
+                updatedAt: new Date()
+            });
+    
+            await firebaseService.updateDocument('users', userId, {
+                'profile': {
+                    avatarUrl
+                }
+            });   
+        } else {
+            const userData = {
+                id: userId,
+                profile: {
+                    displayName: displayName,
+                    avatarUrl: avatarUrl,
+                    email: email
+                },
+                connectedAccounts: {
+                    github: {
+                        accessToken: accessToken
+                    }
+                },
+                createdAt: new Date(),
+                updatedAt: new Date()
             }
-        })
+            await firebaseService.createDocument('users', userData, userId);
+        }
         res.json({ success: true });
     } catch (error) {
         console.error('❌ Error initiating signin:', error);

@@ -25,7 +25,9 @@ export const authOptions: NextAuthOptions = {
                         body: JSON.stringify({
                             userId: user.id,
                             accessToken: account.access_token,
-                            avatarUrl: user.image
+                            avatarUrl: user.image,
+                            email: user.email,
+                            displayName: user.name
                         })
                     });
                     
