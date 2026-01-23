@@ -39,6 +39,7 @@ router.get('/api/user', async (req, res) => {
         };
 
         console.log("Schedule created successfully");
+        console.log(userRepos);
 
         res.status(200).json({ userData: userData });
     } catch (error) {
