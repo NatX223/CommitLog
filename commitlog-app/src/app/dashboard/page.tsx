@@ -690,7 +690,7 @@ function ScheduleModal({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        userId: "66010132",
+        userId: userData?.userId,
         repo: selectedRepo,
         schedule: selectedFrequency,
       }),

@@ -33,14 +33,17 @@ router.post('/api/createSchedule', async (req, res) => {
         if (schedule.length == 1) {
             if (schedule[0] === 'daily') {
                 await firebaseService.createDocument('dailyposts', scheduleData);
+                await firebaseService.addToSubcollection('users', userId, 'schedule', { repo: repo, type: schedule[0] });
             }
             if (schedule[0] === 'weekly') {
                 await firebaseService.createDocument('weeklyposts', scheduleData);
+                await firebaseService.addToSubcollection('users', userId, 'schedule', { repo: repo, type: schedule[0] });
             }          
         }
         
         if (schedule === 'weekly' || schedule === 'both') {
             await firebaseService.createDocument('weeklyposts', scheduleData);
+            await firebaseService.addToSubcollection('users', userId, 'schedule', { repo: repo, type: 'daily and weekly' });
         }
 
         console.log("Schedule created successfully");

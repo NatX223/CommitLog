@@ -27,7 +27,7 @@ export const authOptions: NextAuthOptions = {
                             accessToken: account.access_token,
                             avatarUrl: user.image,
                             email: user.email,
-                            displayName: user.name
+                            displayName: profile?.name
                         })
                     });
                     
