@@ -12,10 +12,31 @@ export default function Waitlist() {
     if (!email) return;
 
     setIsLoading(true);
-    // Simulate API call - replace with actual endpoint later
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsLoading(false);
-    setIsSubmitted(true);
+    
+    try {
+      const response = await fetch('https://commitlog.up.railway.app/api/waitlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setIsSubmitted(true);
+      } else {
+        // Handle error - you might want to show an error message to the user
+        console.error('Waitlist signup failed:', data.message);
+        alert(data.message || 'Failed to join waitlist. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error joining waitlist:', error);
+      alert('Network error. Please check your connection and try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

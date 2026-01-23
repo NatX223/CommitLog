@@ -71,6 +71,54 @@ import {
         throw new Error(`Failed to get document ${documentId} from ${collectionName}: ${error}`);
       }
     }
+
+    /**
+     * Get a document by field value
+     */
+    async getDocumentByField<T>(
+      collectionName: string, 
+      fieldName: string, 
+      fieldValue: any
+    ): Promise<T | null> {
+      try {
+        const collection = this.getCollection(collectionName);
+        const query = collection.where(fieldName, '==', fieldValue).limit(1);
+        const snapshot = await query.get();
+
+        if (snapshot.empty) {
+          return null;
+        }
+
+        const doc = snapshot.docs[0];
+        return { id: doc.id, ...doc.data() } as T;
+      } catch (error) {
+        throw new Error(`Failed to get document by ${fieldName} from ${collectionName}: ${error}`);
+      }
+    }
+
+    /**
+     * Add a document (alias for createDocument without ID)
+     */
+    async addDocument<T>(collectionName: string, data: T): Promise<string> {
+      return this.createDocument(collectionName, data);
+    }
+
+    /**
+     * Get all documents from a collection
+     */
+    async getAllDocuments<T>(collectionName: string): Promise<T[]> {
+      try {
+        const collection = this.firestore.collection(collectionName);
+        const snapshot = await collection.get();
+        
+        return snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as T[];
+      } catch (error) {
+        throw new Error(`Failed to get collection ${collectionName}: ${error}`);
+      }
+    }
   
     /**
      * Update a document

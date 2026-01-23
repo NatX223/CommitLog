@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.js';
 import scheduleRoutes from './routes/schedule.js';
+import waitlistRoutes from './routes/waitlist.js';
 
 import admin from 'firebase-admin';
 import { getFirestore } from 'firebase-admin/firestore';
@@ -43,6 +44,7 @@ app.use(express.urlencoded({ extended: true }));
 // Register routes
 app.use('/', authRoutes);
 app.use('/', scheduleRoutes);
+app.use('/api/waitlist', waitlistRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
