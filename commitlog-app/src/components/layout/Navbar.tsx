@@ -1,5 +1,8 @@
 
+"use client";
+
 import React from 'react';
+import { signIn } from "next-auth/react";
 
 const Navbar: React.FC = () => {
   return (
@@ -19,7 +22,8 @@ const Navbar: React.FC = () => {
         </nav>
 
         <div className="flex items-center gap-4">
-          <button className="hidden sm:block text-sm font-bold">Log in</button>
+          <button onClick={() => signIn("github", { callbackUrl: "/dashboard" })} className="hidden sm:block text-sm font-bold">Log in</button>
+
           {/* <button className="bg-primary text-[#101915] px-5 py-2 rounded-lg text-sm font-bold soft-shadow hover:brightness-105 transition-all">
             Get Started
           </button> */}

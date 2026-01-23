@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { signIn } from "next-auth/react";
 
 interface SignupModalProps {
   isOpen: boolean;
@@ -15,29 +16,7 @@ const SignupModal: React.FC<SignupModalProps> = ({ isOpen, onClose }) => {
   const handleGitHubSignup = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(
-        "https://commitlog.up.railway.app/api/auth/signup",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            provider: "github",
-          }),
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        // If the backend returns a redirect URL, redirect the user
-        if (data.redirectUrl) {
-          window.location.href = data.redirectUrl;
-        }
-      } else {
-        console.error("Signup failed:", response.statusText);
-        // You could show an error message here
-      }
+      await signIn("github", { callbackUrl: "/dashboard" });
     } catch (error) {
       console.error("Error during signup:", error);
       // You could show an error message here

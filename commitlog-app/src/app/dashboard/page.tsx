@@ -1,12 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+import { authOptions } from "../auth";
 
-export default function Dashboard() {
+export default async function Dashboard() {
   const [aiInput, setAiInput] = useState("");
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.id) {
+    redirect("/waitlist");
+  }
 
   const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
