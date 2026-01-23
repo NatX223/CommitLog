@@ -39,11 +39,11 @@ router.post('/api/auth/signin', async (req, res) => {
                 updatedAt: new Date()
             });
     
-            await firebaseService.updateDocument('users', userId, {
-                'profile': {
-                    avatarUrl
-                }
-            });   
+            // await firebaseService.updateDocument('users', userId, {
+            //     'profile.x': {
+            //         avatarUrl
+            //     }
+            // });   
         } else {
             const userData = {
                 id: userId,
