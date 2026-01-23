@@ -8,7 +8,7 @@ export default function Dashboard() {
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
+  const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   const activityItems = [
     {

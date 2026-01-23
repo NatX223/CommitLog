@@ -27,6 +27,32 @@ const client = new TwitterApi({
     clientSecret: process.env.X_CLIENT_SECRET
 });
 
+router.post('/api/auth/signin', async (req, res) => {
+    try {
+        const { userId, accessToken, avatarUrl } = req.body;
+        await firebaseService.updateDocument('users', userId, {
+            'connectedAccounts.github': {
+                accessToken
+            },
+            updatedAt: new Date()
+        });
+
+        await firebaseService.updateDocument('users', userId, {
+            'profile': {
+                avatarUrl
+            }
+        })
+        res.json({ success: true });
+    } catch (error) {
+        console.error('❌ Error initiating signin:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to sign in',
+            message: error instanceof Error ? error.message : 'Unknown error occurred'
+        });
+    }
+});
+
 router.post('/api/auth/signup', async (req, res) => {
     try {
         const { provider } = req.body;
