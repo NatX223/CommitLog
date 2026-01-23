@@ -27,7 +27,7 @@ router.get('/api/user', async (req, res) => {
         const hasGithub = !!userDoc.connectedAccounts?.github;
         const hasX = !!userDoc.connectedAccounts?.x;
 
-        const userRepos = githubService.getUserRepositories(username);
+        const userRepos = await githubService.getUserRepositories(username);
 
         const userData = {
             userId,
@@ -38,8 +38,7 @@ router.get('/api/user', async (req, res) => {
             repos: userRepos
         };
 
-        console.log("Schedule created successfully");
-        console.log(userRepos);
+        console.log("user data fetched successfully");
 
         res.status(200).json({ userData: userData });
     } catch (error) {
