@@ -100,12 +100,15 @@ export class GitHubService {
   /**
    * Get user's repositories
    */
-  async getUserRepositories(username: string): Promise<Array<{ name: string; full_name: string }>> {
+  async getUserRepositories(token: string, username: string): Promise<Array<{ name: string; full_name: string }>> {
     try {
-      const response = await axios.get(`${this.baseURL}/users/${username}/repos`, {
-        headers: this.getHeaders(),
+      const response = await axios.get(`${this.baseURL}/user/repos`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Accept": "application/vnd.github.v3+json"
+        },
         params: {
-          type: 'owner',
+          type: 'public',
           sort: 'updated',
           per_page: 20 // Get up to 20 repositories
         }
