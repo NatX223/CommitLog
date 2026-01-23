@@ -1,4 +1,4 @@
-interface userData {
+export interface userData {
     id: string,
     profile: {
         displayName: string;
@@ -21,4 +21,4 @@ interface userData {
     }
 }
 
-export default userData;
+export interface userSchedule { repo: string, type: string }

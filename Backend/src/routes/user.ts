@@ -1,6 +1,6 @@
 import express from 'express';
 import { firebaseService } from '../services/firebaseService.js';
-import userData from '../models/userSchema.js';
+import { userData, userSchedule } from '../models/userSchema.js';
 import { githubService } from '../services/githubService.js';
 
 const router = express.Router();
@@ -15,6 +15,7 @@ router.get('/api/user', async (req, res) => {
 
     try {
         const userDoc = await firebaseService.getDocument<userData>('users', userId);
+        const userSchedules = await firebaseService.getSubcollectionDocuments<userSchedule>('users', userId, 'schedule');
 
         if (!userDoc) {
             console.log("error");
@@ -35,7 +36,8 @@ router.get('/api/user', async (req, res) => {
             avatarUrl,
             hasGithub,
             hasX,
-            repos: userRepos
+            repos: userRepos,
+            schedules: userSchedules
         };
 
         console.log("user data fetched successfully");

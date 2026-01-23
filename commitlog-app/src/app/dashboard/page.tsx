@@ -223,27 +223,27 @@ export default function Dashboard() {
               Dashboard
             </span>
           </a>
-          <a
+          {/* <a
             className="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-slate-50 hover:text-text-charcoal transition-all"
             href="#"
           >
             <span className="material-symbols-outlined">track_changes</span>
             <span className="font-medium text-sm tracking-wide">Goals</span>
-          </a>
-          <a
+          </a> */}
+          {/* <a
             className="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-slate-50 hover:text-text-charcoal transition-all"
             href="#"
           >
             <span className="material-symbols-outlined">forum</span>
             <span className="font-medium text-sm tracking-wide">Chat</span>
-          </a>
-          <a
+          </a> */}
+          {/* <a
             className="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-slate-50 hover:text-text-charcoal transition-all"
             href="#"
           >
             <span className="material-symbols-outlined">insights</span>
             <span className="font-medium text-sm tracking-wide">Progress</span>
-          </a>
+          </a> */}
           <a
             className="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-slate-50 hover:text-text-charcoal transition-all"
             href="#"
@@ -253,14 +253,14 @@ export default function Dashboard() {
           </a>
         </nav>
 
-        <div className="p-4 mt-auto">
+        {/* <div className="p-4 mt-auto">
           <button className="w-full bg-dashboard-primary text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:opacity-90 transition-opacity card-shadow">
             <span className="material-symbols-outlined text-[20px]">
               add_circle
             </span>
             <span>Manual Log</span>
           </button>
-        </div>
+        </div> */}
       </aside>
 
       {/* Main Content */}
@@ -491,7 +491,7 @@ export default function Dashboard() {
         }`}
       >
         {/* Level Progress */}
-        <div>
+        {/* <div>
           <h4 className="text-xs font-black text-text-muted uppercase tracking-widest mb-6">
             Level Progress
           </h4>
@@ -521,10 +521,10 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Streak Status */}
-        <div>
+        {/* <div>
           <h4 className="text-xs font-black text-text-muted uppercase tracking-widest mb-6">
             Streak Status
           </h4>
@@ -550,7 +550,7 @@ export default function Dashboard() {
               </span>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Integrations */}
         <div>
