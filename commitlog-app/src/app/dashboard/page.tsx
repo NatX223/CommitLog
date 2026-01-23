@@ -174,6 +174,9 @@ export default function Dashboard() {
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          userId: userData?.userId
+        })
       });
 
       if (response.ok) {

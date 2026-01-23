@@ -187,8 +187,7 @@ router.get('/api/auth/callback/github', async (req, res) => {
 
 router.post('/api/auth/x', async (req, res) => {
     try {
-        // Using hardcoded userId for testing
-        const userId = "66010132";
+        const { userId } = req.body;
 
         const user = await firebaseService.getDocument('users', userId);
         if (!user) {
