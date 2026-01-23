@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/auth.js';
 import scheduleRoutes from './routes/schedule.js';
 import waitlistRoutes from './routes/waitlist.js';
+import userRoutes from './routes/user.js';
 
 import admin from 'firebase-admin';
 import { getFirestore } from 'firebase-admin/firestore';
@@ -45,6 +46,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/', authRoutes);
 app.use('/', scheduleRoutes);
 app.use('/api/waitlist', waitlistRoutes);
+app.use('/', userRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

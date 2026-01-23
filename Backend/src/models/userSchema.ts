@@ -15,7 +15,7 @@ interface userData {
             tokenType: string;
             updatedAt: number;
         };
-        github: {
+        github?: {
             accessToken: string;
         }
     }

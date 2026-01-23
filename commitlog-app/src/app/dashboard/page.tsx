@@ -1,20 +1,79 @@
 "use client";
 
-import { useState } from "react";
-import { getServerSession } from "next-auth";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
-import { authOptions } from "../auth";
 
-export default async function Dashboard() {
+// Define the user data type
+interface UserData {
+  userId: string;
+  username: string;
+  avatarUrl: string;
+  hasGithub: boolean;
+  hasX: boolean;
+  repos: Array<{
+    name: string;
+    description: string;
+  }>;
+}
+
+export default function Dashboard() {
+  const { data: session, status } = useSession();
   const [aiInput, setAiInput] = useState("");
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(false);
 
-  const session = await getServerSession(authOptions);
+  // Handle authentication and fetch user data
+  useEffect(() => {
+    if (status === "loading") return; // Still loading
+    if (!session?.user?.id) {
+      redirect("/waitlist");
+    }
 
-  if (!session?.user?.id) {
-    redirect("/waitlist");
+    // Fetch user data when session is available
+    const fetchUserData = async () => {
+      setIsLoadingUser(true);
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user?userId=${session.user.id}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setUserData(data.userData);
+        } else {
+          console.error("Failed to fetch user data");
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      } finally {
+        setIsLoadingUser(false);
+      }
+    };
+
+    fetchUserData();
+  }, [session, status]);
+
+  // Show loading while checking authentication or fetching user data
+  if (status === "loading" || isLoadingUser) {
+    return (
+      <div className="bg-background-light-dash min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-dashboard-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <span className="material-symbols-outlined text-white text-[32px] animate-pulse">
+              terminal
+            </span>
+          </div>
+          <p className="text-text-muted">
+            {status === "loading"
+              ? "Loading dashboard..."
+              : "Fetching user data..."}
+          </p>
+        </div>
+      </div>
+    );
   }
 
   const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -95,32 +154,25 @@ export default async function Dashboard() {
     {
       name: "GitHub",
       icon: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
-      connected: true,
+      connected: userData?.hasGithub || false,
       isImage: true,
     },
     {
       name: "X (Twitter)",
       icon: "share",
       iconColor: "text-[#1DA1F2]",
-      connected: true,
+      connected: userData?.hasX || false,
       isImage: false,
       clickable: true,
-    },
-    {
-      name: "Notion",
-      icon: "grid_view",
-      iconColor: "text-text-muted",
-      connected: false,
-      isImage: false,
     },
   ];
 
   const handleXIntegration = async () => {
     try {
       const response = await fetch(`${backendURL}/api/auth/x`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
 
@@ -131,10 +183,10 @@ export default async function Dashboard() {
           window.location.href = data.redirectUrl;
         }
       } else {
-        console.error('Failed to initiate X integration');
+        console.error("Failed to initiate X integration");
       }
     } catch (error) {
-      console.error('Error connecting to X:', error);
+      console.error("Error connecting to X:", error);
     }
   };
 
@@ -213,9 +265,7 @@ export default async function Dashboard() {
         {/* Header */}
         <header className="h-20 bg-white border-b border-border-light flex items-center justify-between px-8 shrink-0">
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-bold text-text-charcoal">
-              Main Dashboard
-            </h2>
+            <h2 className="text-lg font-bold text-text-charcoal">Dashboard</h2>
           </div>
           <div className="flex items-center gap-6">
             <button className="relative p-2 text-text-muted hover:text-text-charcoal">
@@ -223,20 +273,28 @@ export default async function Dashboard() {
               <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-dashboard-primary rounded-full"></span>
             </button>
             <div className="h-8 w-px bg-border-light"></div>
-            <button 
+            <button
               onClick={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
               className="flex items-center gap-3 hover:bg-slate-50 p-2 rounded-lg transition-all"
             >
               <div className="text-right">
                 <p className="text-sm font-bold text-text-charcoal">
-                  The Architect
+                  {userData?.username || "User"}
                 </p>
                 <p className="text-[10px] text-dashboard-primary uppercase tracking-widest font-black">
-                  Level 12
+                  Level 1
                 </p>
               </div>
               <div className="w-10 h-10 rounded-full border-2 border-dashboard-primary/20 p-0.5">
-                <div className="w-full h-full rounded-full bg-gray-300"></div>
+                {userData?.avatarUrl ? (
+                  <img
+                    src={userData.avatarUrl}
+                    alt="User Avatar"
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full rounded-full bg-gray-300"></div>
+                )}
               </div>
             </button>
           </div>
@@ -255,7 +313,7 @@ export default async function Dashboard() {
                   Activity Stream
                 </h3>
                 <div className="flex gap-2">
-                  <button 
+                  <button
                     onClick={() => setIsScheduleModalOpen(true)}
                     className="bg-dashboard-primary text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 hover:opacity-90 transition-all card-shadow"
                   >
@@ -422,28 +480,41 @@ export default async function Dashboard() {
       </main>
 
       {/* Right Sidebar */}
-      <aside className={`w-80 border-l border-border-light flex flex-col h-screen bg-white shrink-0 p-8 space-y-8 transition-transform duration-300 ${isRightSidebarOpen ? 'translate-x-0' : 'translate-x-full'} fixed right-0 top-0 z-50 xl:relative xl:translate-x-0 ${isRightSidebarOpen ? 'xl:flex' : 'xl:hidden'}`}>
+      <aside
+        className={`w-80 border-l border-border-light flex flex-col h-screen bg-white shrink-0 p-8 space-y-8 transition-transform duration-300 ${
+          isRightSidebarOpen ? "translate-x-0" : "translate-x-full"
+        } fixed right-0 top-0 z-50 xl:relative xl:translate-x-0 ${
+          isRightSidebarOpen ? "xl:flex" : "xl:hidden"
+        }`}
+      >
         {/* Level Progress */}
         <div>
-          <h4 className="text-xs font-black text-text-muted uppercase tracking-widest mb-6">Level Progress</h4>
+          <h4 className="text-xs font-black text-text-muted uppercase tracking-widest mb-6">
+            Level Progress
+          </h4>
           <div className="bg-white border border-border-light rounded-2xl p-5 card-shadow">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h5 className="text-lg font-bold text-text-charcoal">Level 12</h5>
-                <p className="text-xs text-text-muted">The Architect</p>
+                <h5 className="text-lg font-bold text-text-charcoal">
+                  Level 1
+                </h5>
+                <p className="text-xs text-text-muted">{userData?.username || "User"}</p>
               </div>
               <div className="text-right">
-                <p className="text-sm font-bold text-dashboard-primary">2,450 XP</p>
-                <p className="text-xs text-text-muted">Next: 3,000 XP</p>
+                <p className="text-sm font-bold text-dashboard-primary">0 XP</p>
+                <p className="text-xs text-text-muted">Next: 100 XP</p>
               </div>
             </div>
             <div className="space-y-2">
               <div className="flex justify-between text-[10px] font-bold uppercase text-text-muted">
-                <span>Progress to Level 13</span>
-                <span>82%</span>
+                <span>Progress to Level 1</span>
+                <span>0%</span>
               </div>
               <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                <div className="h-full bg-dashboard-primary rounded-full" style={{ width: '82%' }}></div>
+                <div
+                  className="h-full bg-dashboard-primary rounded-full"
+                  style={{ width: "0%" }}
+                ></div>
               </div>
             </div>
           </div>
@@ -451,49 +522,81 @@ export default async function Dashboard() {
 
         {/* Streak Status */}
         <div>
-          <h4 className="text-xs font-black text-text-muted uppercase tracking-widest mb-6">Streak Status</h4>
+          <h4 className="text-xs font-black text-text-muted uppercase tracking-widest mb-6">
+            Streak Status
+          </h4>
           <div className="flex gap-2">
             <div className="flex-1 aspect-square rounded-xl border border-dashboard-primary/20 bg-primary-soft flex flex-col items-center justify-center card-shadow">
-              <span className="text-2xl font-black text-dashboard-primary">14</span>
-              <span className="text-[10px] font-bold text-text-muted">DAYS</span>
+              <span className="text-2xl font-black text-dashboard-primary">
+                0
+              </span>
+              <span className="text-[10px] font-bold text-text-muted">
+                DAYS
+              </span>
             </div>
             <div className="flex-1 aspect-square rounded-xl border border-border-light bg-slate-50 flex flex-col items-center justify-center">
-              <span className="text-2xl font-black text-text-charcoal">42</span>
-              <span className="text-[10px] font-bold text-text-muted">LOGS</span>
+              <span className="text-2xl font-black text-text-charcoal"></span>
+              <span className="text-[10px] font-bold text-text-muted">
+                LOGS
+              </span>
             </div>
             <div className="flex-1 aspect-square rounded-xl border border-border-light bg-slate-50 flex flex-col items-center justify-center">
               <span className="text-2xl font-black text-text-charcoal">0</span>
-              <span className="text-[10px] font-bold text-text-muted">LATE</span>
+              <span className="text-[10px] font-bold text-text-muted">
+                LATE
+              </span>
             </div>
           </div>
         </div>
 
         {/* Integrations */}
         <div>
-          <h4 className="text-xs font-black text-text-muted uppercase tracking-widest mb-4">Integrations</h4>
+          <h4 className="text-xs font-black text-text-muted uppercase tracking-widest mb-4">
+            Integrations
+          </h4>
           <div className="space-y-3">
             {integrations.map((integration, index) => (
-              <div 
-                key={index} 
-                className={`flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-border-light ${!integration.connected ? 'opacity-60' : ''} ${integration.clickable ? 'cursor-pointer hover:bg-slate-100 transition-colors' : ''}`}
-                onClick={integration.clickable && integration.name === 'X (Twitter)' ? handleXIntegration : undefined}
+              <div
+                key={index}
+                className={`flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-border-light ${
+                  !integration.connected ? "opacity-60" : ""
+                } ${
+                  integration.clickable
+                    ? "cursor-pointer hover:bg-slate-100 transition-colors"
+                    : ""
+                }`}
+                onClick={
+                  integration.clickable && integration.name === "X (Twitter)"
+                    ? handleXIntegration
+                    : undefined
+                }
               >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-white border border-border-light flex items-center justify-center">
                     {integration.isImage ? (
-                      <img className="w-5 h-5" alt={`${integration.name} Logo`} src={integration.icon} />
+                      <img
+                        className="w-5 h-5"
+                        alt={`${integration.name} Logo`}
+                        src={integration.icon}
+                      />
                     ) : (
-                      <span className={`material-symbols-outlined text-[18px] ${integration.iconColor}`}>
+                      <span
+                        className={`material-symbols-outlined text-[18px] ${integration.iconColor}`}
+                      >
                         {integration.icon}
                       </span>
                     )}
                   </div>
-                  <span className="text-sm font-semibold">{integration.name}</span>
+                  <span className="text-sm font-semibold">
+                    {integration.name}
+                  </span>
                 </div>
                 {integration.connected ? (
                   <span className="w-2 h-2 rounded-full bg-dashboard-primary"></span>
                 ) : (
-                  <span className="text-[10px] font-bold text-text-muted">CONNECT</span>
+                  <span className="text-[10px] font-bold text-text-muted">
+                    CONNECT
+                  </span>
                 )}
               </div>
             ))}
@@ -504,12 +607,18 @@ export default async function Dashboard() {
         <div className="mt-auto">
           <div className="p-6 rounded-2xl bg-primary-soft border border-dashboard-primary/20 relative overflow-hidden group hover:border-dashboard-primary/40 transition-all cursor-pointer">
             <div className="absolute -right-4 -bottom-4 opacity-5 rotate-12 transition-transform group-hover:scale-110">
-              <span className="material-symbols-outlined text-[100px] text-dashboard-primary">rocket_launch</span>
+              <span className="material-symbols-outlined text-[100px] text-dashboard-primary">
+                rocket_launch
+              </span>
             </div>
-            <h5 className="text-text-charcoal font-bold mb-1">Upgrade Pro</h5>
-            <p className="text-xs text-text-muted mb-4">Unlock advanced AI analysis and team collaboration.</p>
+            <h5 className="text-text-charcoal font-bold mb-1">
+              Upgrade To Pro
+            </h5>
+            <p className="text-xs text-text-muted mb-4">
+              Unlock advanced AI analysis and team collaboration.
+            </p>
             <button className="text-xs font-black text-dashboard-primary uppercase tracking-widest flex items-center gap-1 group-hover:gap-2 transition-all">
-              Learn more <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+              Coming Soon
             </button>
           </div>
         </div>
@@ -517,7 +626,7 @@ export default async function Dashboard() {
 
       {/* Overlay for mobile */}
       {isRightSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-40 xl:hidden"
           onClick={() => setIsRightSidebarOpen(false)}
         />
@@ -525,72 +634,90 @@ export default async function Dashboard() {
 
       {/* Schedule Modal */}
       {isScheduleModalOpen && (
-        <ScheduleModal 
+        <ScheduleModal
           isOpen={isScheduleModalOpen}
           onClose={() => setIsScheduleModalOpen(false)}
+          userData={userData}
         />
       )}
     </div>
   );
 }
 
-function ScheduleModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+function ScheduleModal({
+  isOpen,
+  onClose,
+  userData,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  userData: UserData | null;
+}) {
   const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
   const [selectedRepo, setSelectedRepo] = useState("");
   const [selectedFrequency, setSelectedFrequency] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // Mock repositories - in real app, fetch from GitHub API
-  const repositories = [
-    { name: "commitlog-app", description: "Main application repository", commits: 142 },
-    { name: "api-backend", description: "Backend API service", commits: 89 },
-    { name: "mobile-app", description: "React Native mobile application", commits: 67 },
-    { name: "docs-site", description: "Documentation website", commits: 34 },
-  ];
+  // Use repositories from userData, fallback to empty array if not available
+  const repositories = userData?.repos || [];
 
   const frequencies = [
     { id: "daily", label: "Daily", description: "Post every day at 9:00 AM" },
-    { id: "weekly", label: "Weekly", description: "Post every Monday at 9:00 AM" },
+    {
+      id: "weekly",
+      label: "Weekly",
+      description: "Post every Monday at 9:00 AM",
+    },
   ];
 
   const handleFrequencyToggle = (frequencyId: string) => {
-    setSelectedFrequency(prev => 
-      prev.includes(frequencyId) 
-        ? prev.filter(id => id !== frequencyId)
+    setSelectedFrequency((prev) =>
+      prev.includes(frequencyId)
+        ? prev.filter((id) => id !== frequencyId)
         : [...prev, frequencyId]
     );
   };
 
   const handleCreateSchedule = async () => {
     if (!selectedRepo || selectedFrequency.length === 0) return;
-    
+
     setIsLoading(true);
-    
+
     const response = await fetch(`${backendURL}/api/createSchedule`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({ userId: '66010132', repo: selectedRepo, schedule: selectedFrequency }),
+      body: JSON.stringify({
+        userId: "66010132",
+        repo: selectedRepo,
+        schedule: selectedFrequency,
+      }),
     });
 
     if (response.ok) {
       setIsLoading(false);
       onClose();
-      
+
       // Show success indicator
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
     } else {
-      console.error('Failed to initiate create schedule');
+      console.error("Failed to initiate create schedule");
     }
   };
 
   // Success indicator component
   const SuccessIndicator = () => (
-    <div className={`fixed top-4 right-4 z-[60] bg-green-500 text-white px-4 py-2 rounded-xl flex items-center gap-2 card-shadow transition-all duration-300 ${showSuccess ? 'translate-y-0 opacity-100' : '-translate-y-2 opacity-0'}`}>
-      <span className="material-symbols-outlined text-[18px]">check_circle</span>
+    <div
+      className={`fixed top-4 right-4 z-[60] bg-green-500 text-white px-4 py-2 rounded-xl flex items-center gap-2 card-shadow transition-all duration-300 ${
+        showSuccess ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0"
+      }`}
+    >
+      <span className="material-symbols-outlined text-[18px]">
+        check_circle
+      </span>
       <span className="font-bold text-sm">Schedule created successfully!</span>
     </div>
   );
@@ -601,144 +728,184 @@ function ScheduleModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
     <>
       <SuccessIndicator />
       <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto card-shadow">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-dashboard-primary rounded-xl flex items-center justify-center">
-              <span className="material-symbols-outlined text-white text-[24px]">schedule</span>
+        <div className="bg-white rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto card-shadow">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-dashboard-primary rounded-xl flex items-center justify-center">
+                <span className="material-symbols-outlined text-white text-[24px]">
+                  schedule
+                </span>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-text-charcoal">
+                  Create Schedule
+                </h2>
+                <p className="text-sm text-text-muted">
+                  Automate your commit logs and social posts
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-2xl font-bold text-text-charcoal">Create Schedule</h2>
-              <p className="text-sm text-text-muted">Automate your commit logs and social posts</p>
-            </div>
+            <button
+              onClick={onClose}
+              className="p-2 text-text-muted hover:text-text-charcoal hover:bg-slate-50 rounded-xl transition-all"
+            >
+              <span className="material-symbols-outlined">close</span>
+            </button>
           </div>
-          <button 
-            onClick={onClose}
-            className="p-2 text-text-muted hover:text-text-charcoal hover:bg-slate-50 rounded-xl transition-all"
-          >
-            <span className="material-symbols-outlined">close</span>
-          </button>
-        </div>
 
-        {/* Repository Selection */}
-        <div className="mb-8">
-          <h3 className="text-lg font-bold text-text-charcoal mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-dashboard-primary">folder</span>
-            Select Repository
-          </h3>
-          <div className="space-y-3">
-            {repositories.map((repo) => (
-              <div
-                key={repo.name}
-                onClick={() => setSelectedRepo(repo.name)}
-                className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                  selectedRepo === repo.name
-                    ? 'border-dashboard-primary bg-primary-soft'
-                    : 'border-border-light hover:border-dashboard-primary/30 hover:bg-slate-50'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                      selectedRepo === repo.name ? 'bg-dashboard-primary' : 'bg-slate-100'
-                    }`}>
-                      <span className={`material-symbols-outlined ${
-                        selectedRepo === repo.name ? 'text-white' : 'text-text-muted'
-                      }`}>
-                        folder_open
-                      </span>
+          {/* Repository Selection */}
+          <div className="mb-8">
+            <h3 className="text-lg font-bold text-text-charcoal mb-4 flex items-center gap-2">
+              <span className="material-symbols-outlined text-dashboard-primary">
+                folder
+              </span>
+              Select Repository
+            </h3>
+            <div className="space-y-3">
+              {repositories.map((repo) => (
+                <div
+                  key={repo.name}
+                  onClick={() => setSelectedRepo(repo.name)}
+                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    selectedRepo === repo.name
+                      ? "border-dashboard-primary bg-primary-soft"
+                      : "border-border-light hover:border-dashboard-primary/30 hover:bg-slate-50"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                          selectedRepo === repo.name
+                            ? "bg-dashboard-primary"
+                            : "bg-slate-100"
+                        }`}
+                      >
+                        <span
+                          className={`material-symbols-outlined ${
+                            selectedRepo === repo.name
+                              ? "text-white"
+                              : "text-text-muted"
+                          }`}
+                        >
+                          folder_open
+                        </span>
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-text-charcoal">
+                          {repo.name}
+                        </h4>
+                        <p className="text-sm text-text-muted">
+                          {repo.description}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-bold text-text-charcoal">{repo.name}</h4>
-                      <p className="text-sm text-text-muted">{repo.description}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-bold text-dashboard-primary">{repo.commits}</p>
-                    <p className="text-xs text-text-muted">commits</p>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Frequency Selection */}
-        <div className="mb-8">
-          <h3 className="text-lg font-bold text-text-charcoal mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-dashboard-primary">repeat</span>
-            Posting Frequency
-          </h3>
-          <div className="space-y-3">
-            {frequencies.map((frequency) => (
-              <div
-                key={frequency.id}
-                onClick={() => handleFrequencyToggle(frequency.id)}
-                className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                  selectedFrequency.includes(frequency.id)
-                    ? 'border-dashboard-primary bg-primary-soft'
-                    : 'border-border-light hover:border-dashboard-primary/30 hover:bg-slate-50'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                      selectedFrequency.includes(frequency.id) ? 'bg-dashboard-primary' : 'bg-slate-100'
-                    }`}>
-                      <span className={`material-symbols-outlined ${
-                        selectedFrequency.includes(frequency.id) ? 'text-white' : 'text-text-muted'
-                      }`}>
-                        {frequency.id === 'daily' ? 'today' : 'calendar_month'}
-                      </span>
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-text-charcoal">{frequency.label}</h4>
-                      <p className="text-sm text-text-muted">{frequency.description}</p>
-                    </div>
-                  </div>
-                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+          {/* Frequency Selection */}
+          <div className="mb-8">
+            <h3 className="text-lg font-bold text-text-charcoal mb-4 flex items-center gap-2">
+              <span className="material-symbols-outlined text-dashboard-primary">
+                repeat
+              </span>
+              Posting Frequency
+            </h3>
+            <div className="space-y-3">
+              {frequencies.map((frequency) => (
+                <div
+                  key={frequency.id}
+                  onClick={() => handleFrequencyToggle(frequency.id)}
+                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
                     selectedFrequency.includes(frequency.id)
-                      ? 'border-dashboard-primary bg-dashboard-primary'
-                      : 'border-border-light'
-                  }`}>
-                    {selectedFrequency.includes(frequency.id) && (
-                      <span className="material-symbols-outlined text-white text-[16px]">check</span>
-                    )}
+                      ? "border-dashboard-primary bg-primary-soft"
+                      : "border-border-light hover:border-dashboard-primary/30 hover:bg-slate-50"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                          selectedFrequency.includes(frequency.id)
+                            ? "bg-dashboard-primary"
+                            : "bg-slate-100"
+                        }`}
+                      >
+                        <span
+                          className={`material-symbols-outlined ${
+                            selectedFrequency.includes(frequency.id)
+                              ? "text-white"
+                              : "text-text-muted"
+                          }`}
+                        >
+                          {frequency.id === "daily"
+                            ? "today"
+                            : "calendar_month"}
+                        </span>
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-text-charcoal">
+                          {frequency.label}
+                        </h4>
+                        <p className="text-sm text-text-muted">
+                          {frequency.description}
+                        </p>
+                      </div>
+                    </div>
+                    <div
+                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                        selectedFrequency.includes(frequency.id)
+                          ? "border-dashboard-primary bg-dashboard-primary"
+                          : "border-border-light"
+                      }`}
+                    >
+                      {selectedFrequency.includes(frequency.id) && (
+                        <span className="material-symbols-outlined text-white text-[16px]">
+                          check
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-3">
+            <button
+              onClick={onClose}
+              className="flex-1 py-3 px-6 rounded-xl border border-border-light text-text-muted font-bold hover:bg-slate-50 transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleCreateSchedule}
+              disabled={
+                !selectedRepo || selectedFrequency.length === 0 || isLoading
+              }
+              className="flex-1 py-3 px-6 rounded-xl bg-dashboard-primary text-white font-bold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isLoading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined text-[18px]">
+                    schedule
+                  </span>
+                  Create Schedule
+                </>
+              )}
+            </button>
           </div>
         </div>
-
-        {/* Actions */}
-        <div className="flex gap-3">
-          <button
-            onClick={onClose}
-            className="flex-1 py-3 px-6 rounded-xl border border-border-light text-text-muted font-bold hover:bg-slate-50 transition-all"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleCreateSchedule}
-            disabled={!selectedRepo || selectedFrequency.length === 0 || isLoading}
-            className="flex-1 py-3 px-6 rounded-xl bg-dashboard-primary text-white font-bold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {isLoading ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                Creating...
-              </>
-            ) : (
-              <>
-                <span className="material-symbols-outlined text-[18px]">schedule</span>
-                Create Schedule
-              </>
-            )}
-          </button>
-        </div>
-      </div>
       </div>
     </>
   );
