@@ -18,8 +18,9 @@ router.post('/api/createSchedule', async (req, res) => {
             return res.status(404).json({ error: 'User not found' });
         }
         
+        const _time = Number(time);
         const username = userDoc.profile.displayName;
-        const postUTCHour = DateTime.fromObject({ hour: time }, { zone: timezone }).toUTC().hour;
+        const postUTCHour = DateTime.fromObject({ hour: _time }, { zone: timezone }).toUTC().hour;
         const scheduleData = {
             userId,
             username,

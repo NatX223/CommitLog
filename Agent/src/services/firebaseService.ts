@@ -158,7 +158,7 @@ if (!admin.apps.length) {
      */
     async getDocumentsPaginated<T>(
       collectionName: string,
-      limit: number = 20,
+      limit: number = 50,
       startAfter?: any,
       queryBuilder?: (collection: CollectionReference) => Query
     ): Promise<{ documents: T[], hasMore: boolean, lastDoc: any }> {

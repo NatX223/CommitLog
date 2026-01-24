@@ -1,8 +1,8 @@
-// import { processHourlyPosts } from "../lib/agent-logic";
+import { hourlyPosts } from "./services/agentService";
 
 async function run() {
   console.log("🤖 Agent Worker Starting...");
-  await processHourlyPosts();
+  await hourlyPosts();
   console.log("✅ Agent Worker Finished.");
   process.exit(0); 
 }

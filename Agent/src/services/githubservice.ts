@@ -65,6 +65,27 @@ export class GitHubService {
     }
   }
 
+  async getUserByToken(token: string): Promise<GitHubUser | null> {
+    try {
+      const response = await axios.get(`${this.baseURL}/user`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/vnd.github+json',
+        },
+      });
+
+      return {
+        login: response.data.login,
+        id: response.data.id,
+        name: response.data.name,
+        email: response.data.email
+      };
+    } catch (error) {
+      console.error(`Error fetching GitHub user`, error);
+      return null;
+    }
+  }
+
   /**
    * Get commits for a user since a specific date
    */

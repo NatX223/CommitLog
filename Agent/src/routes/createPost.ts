@@ -1,10 +1,8 @@
 import { Router } from 'express';
 import { google } from '@ai-sdk/google';
 import { generateText, tool, stepCountIs  } from 'ai';
-import { z } from 'zod';
 import { dailyPostPrompt } from '../constants';
 import { getLatestCommits } from '../tools/github/commit_info_tool';
-import { twitterService } from '../services/xService';
 import { postTweet } from '../tools/post/x_post_tool';
 
 const router = Router();
