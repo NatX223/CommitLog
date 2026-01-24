@@ -46,7 +46,19 @@ export class TwitterService {
 
   async sendTweet(userId: any, text: string) {
     const client = await this.getValidClient(userId);
-    return await client.v2.tweet(text);
+  
+    try {
+      const { data: createdTweet } = await client.v2.tweet(text);
+  
+      return {
+        id: createdTweet.id,
+        text: createdTweet.text,
+        url: `https://x.com/i/status/${createdTweet.id}`
+      };
+    } catch (error) {
+      console.error("❌ Failed to send tweet:", error);
+      throw error;
+    }
   }
 }
 

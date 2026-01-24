@@ -4,6 +4,7 @@ import { generateText, tool, stepCountIs  } from 'ai';
 import { dailyPostPrompt, weeklyPostPrompt } from '../constants.js';
 import { getLatestCommits } from '../tools/github/commit_info_tool.js';
 import { postTweet } from '../tools/post/x_post_tool.js';
+import { recordHistory } from '../tools/record/record_history_tool.js';
 import { firebaseService } from './firebaseService.js';
 import userData from '../models/userSchema.js';
 import postSchedule from '../models/postSchedule.js';
@@ -46,6 +47,7 @@ export async function hourlyPosts() {
             
             CURRENT CONTEXT:
             - User: ${username}
+            - UserId: ${userId}
             - Repository: ${repo}
             - Timeframe: Last 1 day
             
@@ -66,7 +68,8 @@ export async function hourlyPosts() {
             // 4. Tool Definitions
             tools: {
                 getLatestCommits,
-                postTweet
+                postTweet,
+                recordHistory
             },
         });
 
@@ -150,7 +153,8 @@ export async function weeklyPosts() {
             // 4. Tool Definitions
             tools: {
                 getLatestCommits,
-                postTweet
+                postTweet,
+                recordHistory
             },
         });
 
