@@ -5,11 +5,12 @@ import { twitterService } from '../../services/xService.js';
 export const postTweet = tool({
   description: 'This tool gets the agent generated tweet and posts it on X.',
   inputSchema: z.object({
-    tweet: z.string().describe('The project name'),
+    tweet: z.string().describe('The generated tweet'),
+    userId: z.string().describe('The user id of the user who wants to post the tweet')
   }),
-  execute: async ({ tweet }) => {
+  execute: async ({ tweet, userId }) => {
     try {
-      await twitterService.sendTweet("66010132", tweet);
+      await twitterService.sendTweet(userId, tweet);
 
       return {
         result: "Tweet posted successfully"
