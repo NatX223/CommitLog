@@ -19,14 +19,14 @@ router.post('/api/createSchedule', async (req, res) => {
         }
         
         const username = userDoc.profile.displayName;
-        const utcHour = DateTime.fromObject({ hour: time }, { zone: timezone }).toUTC().hour;
+        const postUTCHour = DateTime.fromObject({ hour: time }, { zone: timezone }).toUTC().hour;
         const scheduleData = {
             userId,
             username,
             repo,
             type,
             time,
-            utcHour,
+            postUTCHour,
             ...(day && { day }),
             createdAt: new Date().toISOString()
         };
