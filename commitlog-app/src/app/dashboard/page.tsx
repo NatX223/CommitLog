@@ -408,9 +408,9 @@ export default function Dashboard() {
                       </h4>
                       <p className="text-xs text-text-muted mb-4 leading-relaxed">
                         {schedule.type === 'daily' 
-                          ? `Posts daily at ${schedule.time || '9:00 AM'}`
-                          : `Posts weekly on ${schedule.day || 'Monday'} at ${schedule.time || '9:00 AM'}`
-                        }
+                          ? `Posts daily at ${schedule.time + ':00' || '9:00 AM'}`
+                          : `Posts weekly on ${schedule.day || 'Monday'} at ${schedule.time + ':00' || '9:00 AM'}`
+                        } 
                       </p>
                       <div className="flex justify-between items-center">
                         <span className="text-[10px] font-bold text-text-muted uppercase">
