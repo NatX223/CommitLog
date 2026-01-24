@@ -1,4 +1,4 @@
-import { hourlyPosts } from "./services/agentService";
+import { hourlyPosts } from "./services/agentService.js";
 
 async function run() {
   console.log("🤖 Agent Worker Starting...");
