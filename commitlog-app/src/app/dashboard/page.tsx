@@ -15,6 +15,14 @@ interface UserData {
     name: string;
     description: string;
   }>;
+  schedules: Array<{
+    id: string;
+    repo: string;
+    type: string;
+    time?: string;
+    day?: string;
+    createdAt?: string;
+  }>;
 }
 
 export default function Dashboard() {
@@ -22,7 +30,7 @@ export default function Dashboard() {
   const [aiInput, setAiInput] = useState("");
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
+  // const [showSuccess, setShowSuccess] = useState(false);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isLoadingUser, setIsLoadingUser] = useState(false);
 
@@ -109,44 +117,6 @@ export default function Dashboard() {
       links: ["GITHUB"],
       xp: "+500 XP",
       xpColor: "text-amber-600 bg-amber-50",
-    },
-  ];
-
-  const goals = [
-    {
-      title: "User Growth",
-      description: "Reach 100 active beta testers for the platform.",
-      progress: 75,
-      status: "Active",
-      statusColor: "text-dashboard-primary bg-primary-soft",
-      icon: "trending_up",
-      iconBg: "bg-primary-soft",
-      iconColor: "text-dashboard-primary",
-      progressColor: "bg-dashboard-primary",
-    },
-    {
-      title: "API Documentation",
-      description: "Complete Swagger/OpenAPI docs for all endpoints.",
-      progress: 30,
-      status: "On Track",
-      statusColor: "text-text-muted bg-slate-100",
-      icon: "description",
-      iconBg: "bg-slate-50 border border-border-light",
-      iconColor: "text-text-muted",
-      progressColor: "bg-slate-300",
-    },
-    {
-      title: "99.9% Uptime",
-      description: "Maintain high availability during peak traffic windows.",
-      progress: 99,
-      status: "Stable",
-      statusColor: "text-dashboard-primary bg-primary-soft",
-      icon: "speed",
-      iconBg: "bg-primary-soft",
-      iconColor: "text-dashboard-primary",
-      progressColor: "bg-dashboard-primary",
-      healthLabel: "Health",
-      healthValue: "Optimal",
     },
   ];
 
@@ -396,63 +366,81 @@ export default function Dashboard() {
               </div>
             </section>
 
-            {/* Goals Section */}
+            {/* Schedules Section */}
             <section className="space-y-6">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-bold text-text-charcoal uppercase tracking-tight flex items-center gap-2">
                   <span className="material-symbols-outlined text-dashboard-primary">
-                    target
+                    schedule
                   </span>
-                  Goals
+                  Schedules
                 </h3>
-                <button className="bg-dashboard-primary text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 hover:opacity-90 transition-all card-shadow">
+                <button 
+                  onClick={() => setIsScheduleModalOpen(true)}
+                  className="bg-dashboard-primary text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 hover:opacity-90 transition-all card-shadow"
+                >
                   <span className="material-symbols-outlined text-[16px]">
                     add
                   </span>
-                  Create Goal
+                  Create Schedule
                 </button>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {goals.map((goal, index) => (
-                  <div
-                    key={index}
-                    className="bg-white border border-border-light rounded-2xl p-5 card-shadow"
-                  >
-                    <div className="flex justify-between items-start mb-4">
-                      <div className={`p-2 rounded-lg ${goal.iconBg}`}>
-                        <span
-                          className={`material-symbols-outlined text-[20px] ${goal.iconColor}`}
-                        >
-                          {goal.icon}
+                {userData?.schedules && userData.schedules.length > 0 ? (
+                  userData.schedules.map((schedule, index) => (
+                    <div
+                      key={index}
+                      className="bg-white border border-border-light rounded-2xl p-5 card-shadow"
+                    >
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="p-2 rounded-lg bg-primary-soft">
+                          <span className="material-symbols-outlined text-[20px] text-dashboard-primary">
+                            {schedule.type === 'daily' ? 'today' : 'calendar_month'}
+                          </span>
+                        </div>
+                        <span className="text-[10px] font-bold px-2 py-1 rounded text-dashboard-primary bg-primary-soft">
+                          {schedule.type.toUpperCase()}
                         </span>
                       </div>
-                      <span
-                        className={`text-[10px] font-bold px-2 py-1 rounded ${goal.statusColor}`}
-                      >
-                        {goal.status}
+                      <h4 className="font-bold text-text-charcoal mb-1">
+                        {schedule.repo}
+                      </h4>
+                      <p className="text-xs text-text-muted mb-4 leading-relaxed">
+                        {schedule.type === 'daily' 
+                          ? `Posts daily at ${schedule.time || '9:00 AM'}`
+                          : `Posts weekly on ${schedule.day || 'Monday'} at ${schedule.time || '9:00 AM'}`
+                        }
+                      </p>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-bold text-text-muted uppercase">
+                          Active
+                        </span>
+                        <button className="text-text-muted hover:text-red-500 transition-colors">
+                          <span className="material-symbols-outlined text-[16px]">delete</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="col-span-full text-center py-12">
+                    <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <span className="material-symbols-outlined text-slate-400 text-[32px]">
+                        schedule
                       </span>
                     </div>
-                    <h4 className="font-bold text-text-charcoal mb-1">
-                      {goal.title}
-                    </h4>
-                    <p className="text-xs text-text-muted mb-4 leading-relaxed">
-                      {goal.description}
+                    <h4 className="font-bold text-text-charcoal mb-2">No schedules yet</h4>
+                    <p className="text-text-muted text-sm mb-4">
+                      Create your first schedule to automate your commit logs
                     </p>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-[10px] font-bold uppercase text-text-muted">
-                        <span>{goal.healthLabel || "Progress"}</span>
-                        <span>{goal.healthValue || `${goal.progress}%`}</span>
-                      </div>
-                      <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full rounded-full ${goal.progressColor}`}
-                          style={{ width: `${goal.progress}%` }}
-                        ></div>
-                      </div>
-                    </div>
+                    <button 
+                      onClick={() => setIsScheduleModalOpen(true)}
+                      className="bg-dashboard-primary text-white text-sm font-bold px-6 py-3 rounded-xl hover:opacity-90 transition-all"
+                    >
+                      Create Schedule
+                    </button>
                   </div>
-                ))}
+                )}
               </div>
             </section>
           </div>
@@ -658,7 +646,9 @@ function ScheduleModal({
 }) {
   const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
   const [selectedRepo, setSelectedRepo] = useState("");
-  const [selectedFrequency, setSelectedFrequency] = useState<string[]>([]);
+  const [selectedFrequency, setSelectedFrequency] = useState("");
+  const [selectedHour, setSelectedHour] = useState("9");
+  const [selectedDay, setSelectedDay] = useState("monday");
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -666,48 +656,66 @@ function ScheduleModal({
   const repositories = userData?.repos || [];
 
   const frequencies = [
-    { id: "daily", label: "Daily", description: "Post every day at 9:00 AM" },
-    {
-      id: "weekly",
-      label: "Weekly",
-      description: "Post every Monday at 9:00 AM",
-    },
+    { id: "daily", label: "Daily", description: "Post every day" },
+    { id: "weekly", label: "Weekly", description: "Post once a week" },
   ];
 
-  const handleFrequencyToggle = (frequencyId: string) => {
-    setSelectedFrequency((prev) =>
-      prev.includes(frequencyId)
-        ? prev.filter((id) => id !== frequencyId)
-        : [...prev, frequencyId]
-    );
+  const hours = Array.from({ length: 24 }, (_, i) => ({
+    value: i.toString(),
+    label: `${i.toString().padStart(2, '0')}:00`,
+  }));
+
+  const days = [
+    { value: "sunday", label: "Sunday" },
+    { value: "monday", label: "Monday" },
+    { value: "tuesday", label: "Tuesday" },
+    { value: "wednesday", label: "Wednesday" },
+    { value: "thursday", label: "Thursday" },
+    { value: "friday", label: "Friday" },
+    { value: "saturday", label: "Saturday" },
+  ];
+
+  const handleFrequencySelect = (frequencyId: string) => {
+    setSelectedFrequency(frequencyId);
   };
 
   const handleCreateSchedule = async () => {
-    if (!selectedRepo || selectedFrequency.length === 0) return;
+    if (!selectedRepo || !selectedFrequency) return;
 
     setIsLoading(true);
 
-    const response = await fetch(`${backendURL}/api/createSchedule`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userId: userData?.userId,
-        repo: selectedRepo,
-        schedule: selectedFrequency,
-      }),
-    });
+    const detectedTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-    if (response.ok) {
+    const scheduleData = {
+      userId: userData?.userId,
+      repo: selectedRepo,
+      type: selectedFrequency,
+      time: selectedHour,
+      timezone: detectedTz,
+      ...(selectedFrequency === 'weekly' && { day: selectedDay }),
+    };
+
+    try {
+      const response = await fetch(`${backendURL}/api/createSchedule`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(scheduleData),
+      });
+
+      if (response.ok) {
+        onClose();
+        // Show success indicator
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 3000);
+      } else {
+        console.error("Failed to create schedule");
+      }
+    } catch (error) {
+      console.error("Error creating schedule:", error);
+    } finally {
       setIsLoading(false);
-      onClose();
-
-      // Show success indicator
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 3000);
-    } else {
-      console.error("Failed to initiate create schedule");
     }
   };
 
@@ -822,9 +830,9 @@ function ScheduleModal({
               {frequencies.map((frequency) => (
                 <div
                   key={frequency.id}
-                  onClick={() => handleFrequencyToggle(frequency.id)}
+                  onClick={() => handleFrequencySelect(frequency.id)}
                   className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                    selectedFrequency.includes(frequency.id)
+                    selectedFrequency === frequency.id
                       ? "border-dashboard-primary bg-primary-soft"
                       : "border-border-light hover:border-dashboard-primary/30 hover:bg-slate-50"
                   }`}
@@ -833,14 +841,14 @@ function ScheduleModal({
                     <div className="flex items-center gap-3">
                       <div
                         className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                          selectedFrequency.includes(frequency.id)
+                          selectedFrequency === frequency.id
                             ? "bg-dashboard-primary"
                             : "bg-slate-100"
                         }`}
                       >
                         <span
                           className={`material-symbols-outlined ${
-                            selectedFrequency.includes(frequency.id)
+                            selectedFrequency === frequency.id
                               ? "text-white"
                               : "text-text-muted"
                           }`}
@@ -861,12 +869,12 @@ function ScheduleModal({
                     </div>
                     <div
                       className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                        selectedFrequency.includes(frequency.id)
+                        selectedFrequency === frequency.id
                           ? "border-dashboard-primary bg-dashboard-primary"
                           : "border-border-light"
                       }`}
                     >
-                      {selectedFrequency.includes(frequency.id) && (
+                      {selectedFrequency === frequency.id && (
                         <span className="material-symbols-outlined text-white text-[16px]">
                           check
                         </span>
@@ -876,6 +884,73 @@ function ScheduleModal({
                 </div>
               ))}
             </div>
+
+            {/* Time Selection for Daily */}
+            {selectedFrequency === "daily" && (
+              <div className="mt-6 p-4 bg-slate-50 rounded-xl">
+                <h4 className="text-sm font-bold text-text-charcoal mb-3 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-dashboard-primary text-[16px]">
+                    schedule
+                  </span>
+                  Select Time
+                </h4>
+                <select
+                  value={selectedHour}
+                  onChange={(e) => setSelectedHour(e.target.value)}
+                  className="w-full p-3 border border-border-light rounded-lg text-text-charcoal focus:ring-2 focus:ring-dashboard-primary focus:border-dashboard-primary"
+                >
+                  {hours.map((hour) => (
+                    <option key={hour.value} value={hour.value}>
+                      {hour.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* Day and Time Selection for Weekly */}
+            {selectedFrequency === "weekly" && (
+              <div className="mt-6 p-4 bg-slate-50 rounded-xl space-y-4">
+                <div>
+                  <h4 className="text-sm font-bold text-text-charcoal mb-3 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-dashboard-primary text-[16px]">
+                      calendar_today
+                    </span>
+                    Select Day
+                  </h4>
+                  <select
+                    value={selectedDay}
+                    onChange={(e) => setSelectedDay(e.target.value)}
+                    className="w-full p-3 border border-border-light rounded-lg text-text-charcoal focus:ring-2 focus:ring-dashboard-primary focus:border-dashboard-primary"
+                  >
+                    {days.map((day) => (
+                      <option key={day.value} value={day.value}>
+                        {day.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-text-charcoal mb-3 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-dashboard-primary text-[16px]">
+                      schedule
+                    </span>
+                    Select Time
+                  </h4>
+                  <select
+                    value={selectedHour}
+                    onChange={(e) => setSelectedHour(e.target.value)}
+                    className="w-full p-3 border border-border-light rounded-lg text-text-charcoal focus:ring-2 focus:ring-dashboard-primary focus:border-dashboard-primary"
+                  >
+                    {hours.map((hour) => (
+                      <option key={hour.value} value={hour.value}>
+                        {hour.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Actions */}
@@ -889,7 +964,7 @@ function ScheduleModal({
             <button
               onClick={handleCreateSchedule}
               disabled={
-                !selectedRepo || selectedFrequency.length === 0 || isLoading
+                !selectedRepo || !selectedFrequency || isLoading
               }
               className="flex-1 py-3 px-6 rounded-xl bg-dashboard-primary text-white font-bold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >

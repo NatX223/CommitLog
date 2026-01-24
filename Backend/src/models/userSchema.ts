@@ -21,4 +21,11 @@ export interface userData {
     }
 }
 
-export interface userSchedule { repo: string, type: string }
+export interface userSchedule { 
+    id?: string;
+    repo: string; 
+    type: string;
+    time?: string;
+    day?: string;
+    createdAt?: string;
+}

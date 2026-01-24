@@ -15,7 +15,7 @@ router.get('/api/user', async (req, res) => {
 
     try {
         const userDoc = await firebaseService.getDocument<userData>('users', userId);
-        const userSchedules = await firebaseService.getSubcollectionDocuments<userSchedule>('users', userId, 'schedule');
+        const userSchedules = await firebaseService.getSubcollectionDocuments<userSchedule>('users', userId, 'schedules');
 
         if (!userDoc) {
             console.log("error");

@@ -1,19 +1,19 @@
 import express from 'express';
 import { firebaseService } from '../services/firebaseService.js';
-import userData from '../models/userSchema.js';
+import { userData } from '../models/userSchema.js';
 
 const router = express.Router();
 
 router.post('/api/createSchedule', async (req, res) => {
-    const { userId, repo, schedule } = req.body;
+    const { userId, repo, type, time, timezone, day } = req.body;
 
     try {
         // Get user's display name from users collection
         const userDoc = await firebaseService.getDocument<userData>('users', userId);
-        console.log(userId, repo, schedule);
+        console.log('Creating schedule:', { userId, repo, type, time, day });
         
         if (!userDoc) {
-            console.log("error");
+            console.log("User not found");
             return res.status(404).json({ error: 'User not found' });
         }
         
@@ -21,30 +21,28 @@ router.post('/api/createSchedule', async (req, res) => {
         const scheduleData = {
             userId,
             username,
-            repo
+            repo,
+            type,
+            time,
+            ...(day && { day }),
+            createdAt: new Date().toISOString()
         };
 
         // Save to appropriate collections based on schedule type
-        if (schedule.length == 2) {
+        if (type === 'daily') {
             await firebaseService.createDocument('dailyposts', scheduleData);
+        } else if (type === 'weekly') {
             await firebaseService.createDocument('weeklyposts', scheduleData);
         }
 
-        if (schedule.length == 1) {
-            if (schedule[0] === 'daily') {
-                await firebaseService.createDocument('dailyposts', scheduleData);
-                await firebaseService.addToSubcollection('users', userId, 'schedule', { repo: repo, type: schedule[0] });
-            }
-            if (schedule[0] === 'weekly') {
-                await firebaseService.createDocument('weeklyposts', scheduleData);
-                await firebaseService.addToSubcollection('users', userId, 'schedule', { repo: repo, type: schedule[0] });
-            }          
-        }
-        
-        if (schedule === 'weekly' || schedule === 'both') {
-            await firebaseService.createDocument('weeklyposts', scheduleData);
-            await firebaseService.addToSubcollection('users', userId, 'schedule', { repo: repo, type: 'daily and weekly' });
-        }
+        // Add to user's schedules subcollection
+        await firebaseService.addToSubcollection('users', userId, 'schedules', {
+            repo,
+            type,
+            time,
+            ...(day && { day }),
+            createdAt: new Date().toISOString()
+        });
 
         console.log("Schedule created successfully");
         
