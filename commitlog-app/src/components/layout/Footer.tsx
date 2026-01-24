@@ -88,7 +88,7 @@ const Footer = () => {
 
         <div className="pt-12 border-t border-[#e9f1ee] dark:border-white/10 flex flex-col sm:flex-row justify-between items-center gap-6">
           <p className="text-xs text-[#578e77]">
-            © 2024 CommitLog Inc. All rights reserved.
+            © 2026 CommitLog Inc. All rights reserved.
           </p>
           <div className="flex gap-6">
             <a

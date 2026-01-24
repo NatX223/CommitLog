@@ -40,10 +40,10 @@ export default function Hero() {
             >
               Get Started for Free
             </button>
-            <button className="w-full sm:w-auto bg-white dark:bg-white/5 border border-[#d3e4dd] dark:border-white/10 px-8 py-4 rounded-xl text-lg font-bold flex items-center justify-center gap-2 hover:bg-gray-50 transition-all">
+            {/* <button className="w-full sm:w-auto bg-white dark:bg-white/5 border border-[#d3e4dd] dark:border-white/10 px-8 py-4 rounded-xl text-lg font-bold flex items-center justify-center gap-2 hover:bg-gray-50 transition-all">
               <span className="material-symbols-outlined">play_circle</span>
               Watch Demo
-            </button>
+            </button> */}
           </div>
 
           {/* Dashboard Preview */}

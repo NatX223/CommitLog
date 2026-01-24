@@ -1,17 +1,17 @@
 const testimonials = [
   {
     name: "Sarah Chen",
-    role: "Founder, DevFlow",
+    role: " ",
     text: "CommitLog has completely changed my building workflow. I no longer have to worry about 'what to post' - it just happens.",
   },
   {
     name: "Marcus Thorne",
-    role: "Lead Designer, Orbit",
+    role: " ",
     text: "The AI summaries are scarily accurate. It captures exactly what I worked on and makes me look 10x more productive.",
   },
   {
     name: "Leo Kosta",
-    role: "Full-stack Engineer",
+    role: " ",
     text: "Gained 2k followers in 3 months just by automating my GitHub updates. Best tool for indie hackers.",
   }
 ];

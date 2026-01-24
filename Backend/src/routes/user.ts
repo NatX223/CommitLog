@@ -2,6 +2,7 @@ import express from 'express';
 import { firebaseService } from '../services/firebaseService.js';
 import { userData, userSchedule } from '../models/userSchema.js';
 import { githubService } from '../services/githubService.js';
+import historySchema from '../models/historySchema.js';
 
 const router = express.Router();
 
@@ -16,6 +17,7 @@ router.get('/api/user', async (req, res) => {
     try {
         const userDoc = await firebaseService.getDocument<userData>('users', userId);
         const userSchedules = await firebaseService.getSubcollectionDocuments<userSchedule>('users', userId, 'schedules');
+        const userHistory = await firebaseService.getSubcollectionDocuments<historySchema>('users', userId, 'history');
 
         if (!userDoc) {
             console.log("error");
@@ -37,7 +39,8 @@ router.get('/api/user', async (req, res) => {
             hasGithub,
             hasX,
             repos: userRepos,
-            schedules: userSchedules
+            schedules: userSchedules,
+            history: userHistory
         };
 
         console.log("user data fetched successfully");

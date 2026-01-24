@@ -15,6 +15,6 @@
       "declarationMap": true,
       "sourceMap": true
     },
-    "include": ["src/**/*", "src/types/**/*"],
+    "include": ["src/**/*", "src/types/**/*", "../Backend/src/models/historySchema.ts"],
     "exclude": ["node_modules", "dist"]
 }

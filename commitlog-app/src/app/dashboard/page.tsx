@@ -23,6 +23,11 @@ interface UserData {
     day?: string;
     createdAt?: string;
   }>;
+  history: Array<{
+    content: string;
+    link: string;
+    timestamp: Date;
+  }>;
 }
 
 export default function Dashboard() {
@@ -86,39 +91,38 @@ export default function Dashboard() {
 
   const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-  const activityItems = [
-    {
-      time: "09:42 AM",
-      type: "commit",
-      message: 'Committed to main: "Feat: implement rate limiting"',
-      icon: "commit",
-      iconColor: "text-text-muted",
-      dotColor: "bg-dashboard-primary",
-      links: ["GITHUB", "X / TWITTER"],
-      xp: "+50 XP",
-    },
-    {
-      time: "08:15 AM",
-      type: "ai",
-      message: "AI Agent drafted a social post based on 4 commits",
-      icon: "auto_awesome",
-      iconColor: "text-dashboard-primary",
-      dotColor: "bg-dashboard-primary",
-      links: ["X / TWITTER"],
-      status: "DRAFTED",
-    },
-    {
-      time: "Yesterday",
-      type: "goal",
-      message: 'Goal reached: "Complete Database Migration"',
-      icon: "flag",
-      iconColor: "text-amber-500",
-      dotColor: "bg-amber-500",
-      links: ["GITHUB"],
-      xp: "+500 XP",
-      xpColor: "text-amber-600 bg-amber-50",
-    },
-  ];
+  // Format timestamp to display time in current timezone
+  const formatTimestamp = (timestamp: Date | string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
+    
+    if (diffInHours < 24) {
+      return date.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: true 
+      });
+    } else if (diffInHours < 48) {
+      return 'Yesterday';
+    } else {
+      return date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric' 
+      });
+    }
+  };
+
+  // Process history data for activity items
+  const activityItems = userData?.history?.map((historyItem) => ({
+    time: formatTimestamp(historyItem.timestamp),
+    // type: "commit",
+    message: historyItem.content,
+    // icon: "commit",
+    iconColor: "text-text-muted",
+    dotColor: "bg-dashboard-primary",
+    links: historyItem.link ? [{ label: "VIEW", url: historyItem.link }] : [],
+  })) || [ ];
 
   const integrations = [
     {
@@ -286,7 +290,7 @@ export default function Dashboard() {
                   Activity Stream
                 </h3>
                 <div className="flex gap-2">
-                  <button
+                  {/* <button
                     onClick={() => setIsScheduleModalOpen(true)}
                     className="bg-dashboard-primary text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 hover:opacity-90 transition-all card-shadow"
                   >
@@ -294,75 +298,73 @@ export default function Dashboard() {
                       add
                     </span>
                     Create Schedule
-                  </button>
+                  </button> */}
                 </div>
               </div>
 
               <div className="space-y-2">
-                {activityItems.map((item, index) => (
-                  <div
-                    key={index}
-                    className="grid grid-cols-12 gap-4 py-5 px-4 hover:bg-slate-50 rounded-2xl transition-all border-b border-slate-50 last:border-none"
-                  >
-                    <div className="col-span-2 flex items-center gap-3">
-                      <div
-                        className={`w-2 h-2 rounded-full ${item.dotColor}`}
-                      ></div>
-                      <span className="text-xs font-mono text-text-muted tracking-tighter uppercase font-semibold">
-                        {item.time}
+                {activityItems.length > 0 ? (
+                  activityItems.map((item, index) => (
+                    <div
+                      key={index}
+                      className="grid grid-cols-12 gap-4 py-5 px-4 hover:bg-slate-50 rounded-2xl transition-all border-b border-slate-50 last:border-none"
+                    >
+                      <div className="col-span-2 flex items-center gap-3">
+                        <div
+                          className={`w-2 h-2 rounded-full ${item.dotColor}`}
+                        ></div>
+                        <span className="text-xs font-mono text-text-muted tracking-tighter uppercase font-semibold">
+                          {item.time}
+                        </span>
+                      </div>
+                      <div className="col-span-6">
+                        <p className="text-sm font-medium text-text-charcoal flex items-center gap-2">
+                          <span
+                            className={`material-symbols-outlined text-[16px] ${item.iconColor}`}
+                          >
+                            {/* {item.icon} */}
+                          </span>
+                          {item.message}
+                        </p>
+                      </div>
+                      <div className="col-span-4 flex items-center justify-end gap-3">
+                        {item.links?.map((link, linkIndex) => (
+                          <a
+                            key={linkIndex}
+                            className="flex items-center gap-1.5 text-[10px] font-bold text-text-muted hover:text-dashboard-primary bg-slate-100 px-3 py-1.5 rounded-lg transition-colors"
+                            href={typeof link === 'object' ? link.url : "#"}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            view tweet
+                          </a>
+                        ))}
+                        {/* {item.xp && (
+                          <span
+                            className={`text-[10px] font-bold px-2 py-1.5 rounded-lg tracking-widest ${
+                              item.xpColor ||
+                              "text-dashboard-primary bg-primary-soft"
+                            }`}
+                          >
+                            {item.xp}
+                          </span>
+                        )} */}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <span className="material-symbols-outlined text-slate-400 text-[32px]">
+                        history
                       </span>
                     </div>
-                    <div className="col-span-6">
-                      <p className="text-sm font-medium text-text-charcoal flex items-center gap-2">
-                        <span
-                          className={`material-symbols-outlined text-[16px] ${item.iconColor}`}
-                        >
-                          {item.icon}
-                        </span>
-                        {item.type === "commit" ? (
-                          <>
-                            Committed to{" "}
-                            <code className="text-dashboard-primary bg-primary-soft px-1 rounded font-bold">
-                              main
-                            </code>
-                            : "Feat: implement rate limiting"
-                          </>
-                        ) : (
-                          item.message
-                        )}
-                      </p>
-                    </div>
-                    <div className="col-span-4 flex items-center justify-end gap-3">
-                      {item.links?.map((link, linkIndex) => (
-                        <a
-                          key={linkIndex}
-                          className="flex items-center gap-1.5 text-[10px] font-bold text-text-muted hover:text-dashboard-primary bg-slate-100 px-3 py-1.5 rounded-lg transition-colors"
-                          href="#"
-                        >
-                          <span className="material-symbols-outlined text-[14px]">
-                            {link.includes("GITHUB") ? "link" : "share"}
-                          </span>
-                          {link}
-                        </a>
-                      ))}
-                      {item.status && (
-                        <span className="text-[10px] font-bold text-dashboard-primary bg-primary-soft px-2 py-1.5 rounded-lg tracking-widest uppercase">
-                          {item.status}
-                        </span>
-                      )}
-                      {item.xp && (
-                        <span
-                          className={`text-[10px] font-bold px-2 py-1.5 rounded-lg tracking-widest ${
-                            item.xpColor ||
-                            "text-dashboard-primary bg-primary-soft"
-                          }`}
-                        >
-                          {item.xp}
-                        </span>
-                      )}
-                    </div>
+                    <h4 className="font-bold text-text-charcoal mb-2">No activity yet</h4>
+                    <p className="text-text-muted text-sm">
+                      Your commit history and activity will appear here
+                    </p>
                   </div>
-                ))}
+                )}
               </div>
             </section>
 
