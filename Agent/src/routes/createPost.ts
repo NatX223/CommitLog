@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { google } from '@ai-sdk/google';
 import { generateText, tool, stepCountIs  } from 'ai';
-import { dailyPostPrompt } from '../constants';
-import { getLatestCommits } from '../tools/github/commit_info_tool';
-import { postTweet } from '../tools/post/x_post_tool';
+import { dailyPostPrompt } from '../constants.js';
+import { getLatestCommits } from '../tools/github/commit_info_tool.js';
+import { postTweet } from '../tools/post/x_post_tool.js';
 
 const router = Router();
 

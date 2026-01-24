@@ -1,6 +1,6 @@
 import { tool } from 'ai';
 import { z } from 'zod';
-import { githubService } from '../../services/githubservice';
+import { githubService } from '../../services/githubservice.js';
 
 export const getLatestCommits = tool({
   description: 'Fetch the latest commit messages and metadata for a user across all their repositories.',

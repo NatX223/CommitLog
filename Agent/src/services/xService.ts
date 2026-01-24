@@ -1,6 +1,6 @@
 import { TwitterApi } from 'twitter-api-v2';
-import { firebaseService } from './firebaseService';
-import userData from "../models/userSchema";
+import { firebaseService } from './firebaseService.js';
+import userData from "../models/userSchema.js";
 
 export class TwitterService {
   async getValidClient(userId: string) {

@@ -1,6 +1,6 @@
 import { tool } from 'ai';
 import { z } from 'zod';
-import { twitterService } from '../../services/xService';
+import { twitterService } from '../../services/xService.js';
 
 export const postTweet = tool({
   description: 'This tool gets the agent generated tweet and posts it on X.',
