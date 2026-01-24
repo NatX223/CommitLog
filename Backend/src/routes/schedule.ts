@@ -1,6 +1,7 @@
 import express from 'express';
 import { firebaseService } from '../services/firebaseService.js';
 import { userData } from '../models/userSchema.js';
+import { DateTime } from 'luxon';
 
 const router = express.Router();
 
@@ -18,12 +19,14 @@ router.post('/api/createSchedule', async (req, res) => {
         }
         
         const username = userDoc.profile.displayName;
+        const utcHour = DateTime.fromObject({ hour: time }, { zone: timezone }).toUTC().hour;
         const scheduleData = {
             userId,
             username,
             repo,
             type,
             time,
+            utcHour,
             ...(day && { day }),
             createdAt: new Date().toISOString()
         };
