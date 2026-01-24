@@ -9,7 +9,7 @@ export const postTweet = tool({
   }),
   execute: async ({ tweet }) => {
     try {
-      await twitterService.sendTweet("66010132" ,tweet);
+      await twitterService.sendTweet("66010132", tweet);
 
       return {
         result: "Tweet posted successfully"

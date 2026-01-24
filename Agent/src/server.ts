@@ -3,32 +3,35 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import agentRoutes from './routes/createPost.js';
 
-import admin from 'firebase-admin';
-import { getFirestore } from 'firebase-admin/firestore';
+// import admin from 'firebase-admin';
+// import { getFirestore } from 'firebase-admin/firestore';
 
 dotenv.config();
 
-let CREDENTIALS;
-try {
-    const credBase64 = process.env.CRED;
-    if (!credBase64) {
-        throw new Error('CRED environment variable is not set');
-    }
+// import { db } from './lib/firebase.js';
 
-    CREDENTIALS = JSON.parse(
-        Buffer.from(credBase64, 'base64').toString('utf-8')
-    );
-} catch (error) {
-    console.error('❌ Failed to parse Firebase credentials:', error);
-    process.exit(1);
-}
+// let CREDENTIALS;
+// try {
+//     const credBase64 = process.env.CRED;
+//     if (!credBase64) {
+//         throw new Error('CRED environment variable is not set');
+//     }
 
-admin.initializeApp({
-    credential: admin.credential.cert(CREDENTIALS),
-});
+//     CREDENTIALS = JSON.parse(
+//         Buffer.from(credBase64, 'base64').toString('utf-8')
+//     );
+// } catch (error) {
+//     console.error('❌ Failed to parse Firebase credentials:', error);
+//     process.exit(1);
+// }
 
-// Initialize Firestore
-export const db = getFirestore();
+// admin.initializeApp({
+//     credential: admin.credential.cert(CREDENTIALS),
+// });
+
+// // Initialize Firestore
+// export const db = getFirestore();
+// export db = db;
 
 // Create Express app
 const app = express();

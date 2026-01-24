@@ -1,11 +1,40 @@
 import {
-    Firestore,
-    CollectionReference,
-    Query,
-    Timestamp,
-    getFirestore
-  } from 'firebase-admin/firestore';
+  Firestore,
+  CollectionReference,
+  Query,
+  Timestamp,
+  getFirestore
+} from 'firebase-admin/firestore';
+
+import admin from 'firebase-admin';
+import dotenv from 'dotenv';
   
+dotenv.config();
+
+if (!admin.apps.length) {
+  try {
+    const credBase64 = process.env.CRED;
+    
+    if (!credBase64) {
+      throw new Error('Environment variable "CRED" is missing.');
+    }
+
+    // Decode and parse in one clean flow
+    const serviceAccount = JSON.parse(
+      Buffer.from(credBase64, 'base64').toString('utf8')
+    );
+
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
+
+    console.log("🔥 Firebase Admin Initialized Successfully");
+  } catch (error) {
+    // We use process.exit(1) because if Firebase fails, the whole app/worker is useless
+    console.error("❌ Critical: Firebase Admin init failed:", error instanceof Error ? error.message : error);
+    process.exit(1);
+  }
+}
   export class FirebaseService {
     private _firestore: Firestore | null = null;
   

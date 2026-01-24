@@ -6,7 +6,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node dist/server.js",
+    "start:worker": "node dist/worker.js",
     "dev": "tsx watch src/server.ts",
+    "dev:worker": "tsx watch src/worker.ts",
     "build": "tsc",
     "test": "jest"
   },
