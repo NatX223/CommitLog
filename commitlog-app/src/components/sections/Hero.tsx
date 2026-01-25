@@ -1,10 +1,24 @@
 "use client";
 
 import { useState } from "react";
+import { signIn } from "next-auth/react";
 import SignupModal from "../ui/SignupModal";
 
 export default function Hero() {
   const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleGoogleSignup = async () => {
+    setIsLoading(true);
+    try {
+      await signIn("google", { callbackUrl: "/dashboard" });
+    } catch (error) {
+      console.error("Error during signup:", error);
+      // You could show an error message here
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <>
@@ -35,10 +49,18 @@ export default function Hero() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
-              onClick={() => setIsSignupModalOpen(true)}
-              className="w-full sm:w-auto bg-primary text-brand-text px-8 py-4 rounded-xl text-lg font-bold shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:scale-105 transition-all"
+              onClick={handleGoogleSignup}
+              disabled={isLoading}
+              className="w-full sm:w-auto bg-primary text-brand-text px-8 py-4 rounded-xl text-lg font-bold shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Get Started for Free
+              {isLoading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-brand-text/30 border-t-brand-text rounded-full animate-spin"></div>
+                  Signing up...
+                </>
+              ) : (
+                "Get Started for Free"
+              )}
             </button>
             {/* <button className="w-full sm:w-auto bg-white dark:bg-white/5 border border-[#d3e4dd] dark:border-white/10 px-8 py-4 rounded-xl text-lg font-bold flex items-center justify-center gap-2 hover:bg-gray-50 transition-all">
               <span className="material-symbols-outlined">play_circle</span>

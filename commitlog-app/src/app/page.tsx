@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { signIn } from "next-auth/react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Hero from "@/components/sections/Hero";
@@ -11,6 +12,19 @@ import SignupModal from "@/components/ui/SignupModal";
 
 export default function LandingPage() {
   const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleGoogleSignup = async () => {
+    setIsLoading(true);
+    try {
+      await signIn("google", { callbackUrl: "/dashboard" });
+    } catch (error) {
+      console.error("Error during signup:", error);
+      // You could show an error message here
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <>
@@ -37,10 +51,18 @@ export default function LandingPage() {
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                   <button 
-                    onClick={() => setIsSignupModalOpen(true)}
-                    className="w-full sm:w-auto bg-[#101915] text-white px-10 py-5 rounded-2xl text-xl font-bold soft-shadow hover:scale-105 transition-all"
+                    onClick={handleGoogleSignup}
+                    disabled={isLoading}
+                    className="w-full sm:w-auto bg-[#101915] text-white px-10 py-5 rounded-2xl text-xl font-bold soft-shadow hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    Get Started for Free
+                    {isLoading ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        Signing up...
+                      </>
+                    ) : (
+                      "Get Started for Free"
+                    )}
                   </button>
                   <p className="text-[#101915]/50 text-sm font-bold">No credit card required</p>
                 </div>
