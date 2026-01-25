@@ -7,7 +7,7 @@ export interface userData {
     };
     createdAt: Date;
     updatedAt: Date;
-    connectedAccounts: {
+    connectedAccounts?: {
         x?: {
             accessToken: string;
             expiresAt: number;
