@@ -30,7 +30,7 @@ router.get('/api/user', async (req, res) => {
         const hasGithub = !!userDoc.connectedAccounts?.github;
         const hasX = !!userDoc.connectedAccounts?.x;
 
-        const userRepos = await githubService.getUserRepositories(userDoc.connectedAccounts.github?.accessToken!, username);
+        const userRepos = await githubService.getUserRepositories(userDoc.connectedAccounts?.github?.accessToken!, username);
 
         const userData = {
             userId,
