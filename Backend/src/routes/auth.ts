@@ -6,7 +6,7 @@ import { firebaseService } from '../services/firebaseService.js';
 
 const router = express.Router();
 
-const oauthStates = new Map<string, { timestamp: number }>();
+const oauthStates = new Map<string, { timestamp: number, userId: string }>();
 
 setInterval(() => {
     const now = Date.now();
@@ -85,7 +85,8 @@ router.post('/api/auth/github', async (req, res) => {
 
         const state = randomUUID();
         oauthStates.set(state, {
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            userId
         });
 
         const clientId = process.env.GITHUB_CLIENT_ID!;
@@ -120,7 +121,7 @@ router.get('/api/auth/callback/github', async (req, res) => {
             });
         }
 
-        oauthStates.delete(state as string);
+        const userId = oauthStates.get(state as string)?.userId;
 
         // Exchange code for access token
         const tokenResponse = await axios.post('https://github.com/login/oauth/access_token', {
@@ -142,45 +143,15 @@ router.get('/api/auth/callback/github', async (req, res) => {
             });
         }
 
-        // Fetch user profile
-        const userResponse = await axios.get('https://api.github.com/user', {
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Accept': 'application/vnd.github.v3+json'
-            }
-        });
-
-        const githubUser = userResponse.data;
-
-        const userId = githubUser.id.toString();
-
-        // const user = await firebaseService.getDocument('users', userId);
-        // if (!user) {
-        //     const userData = {
-        //         id: userId,
-        //         profile: {
-        //             displayName: githubUser.login,
-        //             avatarUrl: githubUser.avatar_url,
-        //             email: githubUser.email
-        //         },
-        //         connectedAccounts: {
-        //             github: {
-        //                 accessToken: accessToken
-        //             }
-        //         },
-        //         createdAt: new Date(),
-        //         updatedAt: new Date()
-        //     }
-        //     await firebaseService.createDocument('users', userData, userId);
-        //     console.log(`✅ GitHub connected for user: ${userId}`);
-        // }
-
-        await firebaseService.updateDocument('users', userId, {
+        await firebaseService.updateDocument('users', userId!, {
             'connectedAccounts.github': {
                 accessToken
             },
             updatedAt: new Date()
         });
+
+        oauthStates.delete(state as string);
+        console.log(`Successfully authenticated user ${userId} with GitHub`);
 
         res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
 
