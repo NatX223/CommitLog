@@ -73,6 +73,7 @@ router.post('/api/auth/signin', async (req, res) => {
 router.post('/api/auth/github', async (req, res) => {
     try {
         const { userId } = req.body;
+        console.log("user id", userId);
 
         const user = await firebaseService.getDocument('users', userId);
         if (!user) {
