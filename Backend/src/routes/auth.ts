@@ -29,15 +29,17 @@ const client = new TwitterApi({
 
 router.post('/api/auth/signin', async (req, res) => {
     try {
-        const { userId, accessToken, avatarUrl, email, displayName } = req.body;
+        const { userId, avatarUrl, email, displayName } = req.body;
         const userDoc = await firebaseService.getDocument('users', userId);
         if (userDoc) {
-            await firebaseService.updateDocument('users', userId, {
-                'connectedAccounts.github': {
-                    accessToken
-                },
-                updatedAt: new Date()
-            });
+            console.log(`user ${userId} sign in`);
+            
+            // await firebaseService.updateDocument('users', userId, {
+            //     'connectedAccounts.github': {
+            //         accessToken
+            //     },
+            //     updatedAt: new Date()
+            // });
     
             // await firebaseService.updateDocument('users', userId, {
             //     'profile.x': {
@@ -51,11 +53,6 @@ router.post('/api/auth/signin', async (req, res) => {
                     displayName: displayName,
                     avatarUrl: avatarUrl,
                     email: email
-                },
-                connectedAccounts: {
-                    github: {
-                        accessToken: accessToken
-                    }
                 },
                 createdAt: new Date(),
                 updatedAt: new Date()
@@ -73,18 +70,18 @@ router.post('/api/auth/signin', async (req, res) => {
     }
 });
 
-router.post('/api/auth/signup', async (req, res) => {
+router.post('/api/auth/github', async (req, res) => {
     try {
-        const { provider } = req.body;
+        const { userId } = req.body;
 
-        if (provider !== 'github') {
-            return res.status(400).json({
+        const user = await firebaseService.getDocument('users', userId);
+        if (!user) {
+            return res.status(404).json({
                 success: false,
-                error: 'Unsupported provider'
+                error: 'User not found - create an account first'
             });
         }
 
-        // Generate state parameter for security
         const state = randomUUID();
         oauthStates.set(state, {
             timestamp: Date.now()
@@ -156,26 +153,33 @@ router.get('/api/auth/callback/github', async (req, res) => {
 
         const userId = githubUser.id.toString();
 
-        const user = await firebaseService.getDocument('users', userId);
-        if (!user) {
-            const userData = {
-                id: userId,
-                profile: {
-                    displayName: githubUser.login,
-                    avatarUrl: githubUser.avatar_url,
-                    email: githubUser.email
-                },
-                connectedAccounts: {
-                    github: {
-                        accessToken: accessToken
-                    }
-                },
-                createdAt: new Date(),
-                updatedAt: new Date()
-            }
-            await firebaseService.createDocument('users', userData, userId);
-            console.log(`✅ GitHub connected for user: ${userId}`);
-        }
+        // const user = await firebaseService.getDocument('users', userId);
+        // if (!user) {
+        //     const userData = {
+        //         id: userId,
+        //         profile: {
+        //             displayName: githubUser.login,
+        //             avatarUrl: githubUser.avatar_url,
+        //             email: githubUser.email
+        //         },
+        //         connectedAccounts: {
+        //             github: {
+        //                 accessToken: accessToken
+        //             }
+        //         },
+        //         createdAt: new Date(),
+        //         updatedAt: new Date()
+        //     }
+        //     await firebaseService.createDocument('users', userData, userId);
+        //     console.log(`✅ GitHub connected for user: ${userId}`);
+        // }
+
+        await firebaseService.updateDocument('users', userId, {
+            'connectedAccounts.github': {
+                accessToken
+            },
+            updatedAt: new Date()
+        });
 
         res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
 
