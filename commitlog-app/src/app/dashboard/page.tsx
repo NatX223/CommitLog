@@ -138,6 +138,7 @@ export default function Dashboard() {
       icon: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
       connected: userData?.hasGithub || false,
       isImage: true,
+      clickable: true,
     },
     {
       name: "X (Twitter)",
@@ -172,6 +173,32 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.error("Error connecting to X:", error);
+    }
+  };
+
+  const handleGithubIntegration = async () => {
+    try {
+      const response = await fetch(`${backendURL}/api/auth/github`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: userData?.userId,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.redirectUrl) {
+          // Navigate to the github OAuth URL
+          window.location.href = data.redirectUrl;
+        }
+      } else {
+        console.error("Failed to initiate github integration");
+      }
+    } catch (error) {
+      console.error("Error connecting to github:", error);
     }
   };
 
@@ -807,8 +834,12 @@ export default function Dashboard() {
                     : ""
                 }`}
                 onClick={
-                  integration.clickable && integration.name === "X (Twitter)"
-                    ? handleXIntegration
+                  integration.clickable
+                    ? integration.name === "X (Twitter)"
+                      ? handleXIntegration
+                      : integration.name === "GitHub"
+                      ? handleGithubIntegration
+                      : undefined
                     : undefined
                 }
               >
