@@ -34,6 +34,7 @@ export default function Dashboard() {
   const { data: session, status } = useSession();
   const [aiInput, setAiInput] = useState("");
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
+  const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   // const [showSuccess, setShowSuccess] = useState(false);
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -96,33 +97,34 @@ export default function Dashboard() {
     const date = new Date(timestamp);
     const now = new Date();
     const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
-    
+
     if (diffInHours < 24) {
-      return date.toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: true 
+      return date.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
       });
     } else if (diffInHours < 48) {
-      return 'Yesterday';
+      return "Yesterday";
     } else {
-      return date.toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric' 
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
       });
     }
   };
 
   // Process history data for activity items
-  const activityItems = userData?.history?.map((historyItem) => ({
-    time: formatTimestamp(historyItem.timestamp),
-    // type: "commit",
-    message: historyItem.content,
-    // icon: "commit",
-    iconColor: "text-text-muted",
-    dotColor: "bg-dashboard-primary",
-    links: historyItem.link ? [{ label: "VIEW", url: historyItem.link }] : [],
-  })) || [ ];
+  const activityItems =
+    userData?.history?.map((historyItem) => ({
+      time: formatTimestamp(historyItem.timestamp),
+      // type: "commit",
+      message: historyItem.content,
+      // icon: "commit",
+      iconColor: "text-text-muted",
+      dotColor: "bg-dashboard-primary",
+      links: historyItem.link ? [{ label: "VIEW", url: historyItem.link }] : [],
+    })) || [];
 
   const integrations = [
     {
@@ -149,8 +151,8 @@ export default function Dashboard() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userId: userData?.userId
-        })
+          userId: userData?.userId,
+        }),
       });
 
       if (response.ok) {
@@ -170,7 +172,11 @@ export default function Dashboard() {
   return (
     <div className="bg-background-light-dash text-text-charcoal min-h-screen flex overflow-hidden font-space-grotesk">
       {/* Sidebar */}
-      <aside className="w-64 border-r border-border-light flex flex-col h-screen bg-white shrink-0">
+      <aside
+        className={`w-64 border-r border-border-light flex flex-col h-screen bg-white shrink-0 transition-transform duration-300 ${
+          isLeftSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } fixed left-0 top-0 z-50 lg:relative lg:translate-x-0`}
+      >
         <div className="p-6 flex items-center gap-3">
           <div className="w-10 h-10 bg-dashboard-primary rounded-lg flex items-center justify-center">
             <span className="material-symbols-outlined text-white font-bold">
@@ -240,8 +246,14 @@ export default function Dashboard() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
         {/* Header */}
-        <header className="h-20 bg-white border-b border-border-light flex items-center justify-between px-8 shrink-0">
-          <div className="flex items-center gap-2">
+        <header className="h-20 bg-white border-b border-border-light flex items-center justify-between px-4 lg:px-8 shrink-0">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)}
+              className="lg:hidden p-2 text-text-muted hover:text-text-charcoal hover:bg-slate-50 rounded-lg transition-all"
+            >
+              <span className="material-symbols-outlined">menu</span>
+            </button>
             <h2 className="text-lg font-bold text-text-charcoal">Dashboard</h2>
           </div>
           <div className="flex items-center gap-6">
@@ -278,12 +290,12 @@ export default function Dashboard() {
         </header>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-8 pb-32">
+        <div className="flex-1 overflow-y-auto p-4 lg:p-8 pb-32">
           <div className="max-w-6xl mx-auto space-y-8">
             {/* Activity Stream */}
-            <section className="bg-white border border-border-light rounded-3xl p-6 card-shadow">
-              <div className="flex items-center justify-between mb-8">
-                <h3 className="text-xl font-bold text-text-charcoal uppercase tracking-tight flex items-center gap-2">
+            <section className="bg-white border border-border-light rounded-3xl p-4 lg:p-6 card-shadow">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 lg:mb-8 gap-4">
+                <h3 className="text-lg lg:text-xl font-bold text-text-charcoal uppercase tracking-tight flex items-center gap-2">
                   <span className="material-symbols-outlined text-dashboard-primary">
                     history
                   </span>
@@ -307,9 +319,9 @@ export default function Dashboard() {
                   activityItems.map((item, index) => (
                     <div
                       key={index}
-                      className="grid grid-cols-12 gap-4 py-5 px-4 hover:bg-slate-50 rounded-2xl transition-all border-b border-slate-50 last:border-none"
+                      className="grid grid-cols-1 lg:grid-cols-12 gap-4 py-5 px-4 hover:bg-slate-50 rounded-2xl transition-all border-b border-slate-50 last:border-none"
                     >
-                      <div className="col-span-2 flex items-center gap-3">
+                      <div className="lg:col-span-2 flex items-center gap-3">
                         <div
                           className={`w-2 h-2 rounded-full ${item.dotColor}`}
                         ></div>
@@ -317,7 +329,7 @@ export default function Dashboard() {
                           {item.time}
                         </span>
                       </div>
-                      <div className="col-span-6">
+                      <div className="lg:col-span-6">
                         <p className="text-sm font-medium text-text-charcoal flex items-center gap-2">
                           <span
                             className={`material-symbols-outlined text-[16px] ${item.iconColor}`}
@@ -327,12 +339,12 @@ export default function Dashboard() {
                           {item.message}
                         </p>
                       </div>
-                      <div className="col-span-4 flex items-center justify-end gap-3">
+                      <div className="lg:col-span-4 flex items-center justify-start lg:justify-end gap-3">
                         {item.links?.map((link, linkIndex) => (
                           <a
                             key={linkIndex}
                             className="flex items-center gap-1.5 text-[10px] font-bold text-text-muted hover:text-dashboard-primary bg-slate-100 px-3 py-1.5 rounded-lg transition-colors"
-                            href={typeof link === 'object' ? link.url : "#"}
+                            href={typeof link === "object" ? link.url : "#"}
                             target="_blank"
                             rel="noopener noreferrer"
                           >
@@ -359,7 +371,9 @@ export default function Dashboard() {
                         history
                       </span>
                     </div>
-                    <h4 className="font-bold text-text-charcoal mb-2">No activity yet</h4>
+                    <h4 className="font-bold text-text-charcoal mb-2">
+                      No activity yet
+                    </h4>
                     <p className="text-text-muted text-sm">
                       Your commit history and activity will appear here
                     </p>
@@ -370,16 +384,16 @@ export default function Dashboard() {
 
             {/* Schedules Section */}
             <section className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-text-charcoal uppercase tracking-tight flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <h3 className="text-lg lg:text-xl font-bold text-text-charcoal uppercase tracking-tight flex items-center gap-2">
                   <span className="material-symbols-outlined text-dashboard-primary">
                     schedule
                   </span>
                   Schedules
                 </h3>
-                <button 
+                <button
                   onClick={() => setIsScheduleModalOpen(true)}
-                  className="bg-dashboard-primary text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 hover:opacity-90 transition-all card-shadow"
+                  className="bg-dashboard-primary text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 hover:opacity-90 transition-all card-shadow w-fit"
                 >
                   <span className="material-symbols-outlined text-[16px]">
                     add
@@ -398,7 +412,9 @@ export default function Dashboard() {
                       <div className="flex justify-between items-start mb-4">
                         <div className="p-2 rounded-lg bg-primary-soft">
                           <span className="material-symbols-outlined text-[20px] text-dashboard-primary">
-                            {schedule.type === 'daily' ? 'today' : 'calendar_month'}
+                            {schedule.type === "daily"
+                              ? "today"
+                              : "calendar_month"}
                           </span>
                         </div>
                         <span className="text-[10px] font-bold px-2 py-1 rounded text-dashboard-primary bg-primary-soft">
@@ -409,17 +425,22 @@ export default function Dashboard() {
                         {schedule.repo}
                       </h4>
                       <p className="text-xs text-text-muted mb-4 leading-relaxed">
-                        {schedule.type === 'daily' 
-                          ? `Posts daily at ${schedule.time + ':00' || '9:00 AM'}`
-                          : `Posts weekly on ${schedule.day || 'Monday'} at ${schedule.time + ':00' || '9:00 AM'}`
-                        } 
+                        {schedule.type === "daily"
+                          ? `Posts daily at ${
+                              schedule.time + ":00" || "9:00 AM"
+                            }`
+                          : `Posts weekly on ${schedule.day || "Monday"} at ${
+                              schedule.time + ":00" || "9:00 AM"
+                            }`}
                       </p>
                       <div className="flex justify-between items-center">
                         <span className="text-[10px] font-bold text-text-muted uppercase">
                           Active
                         </span>
                         <button className="text-text-muted hover:text-red-500 transition-colors">
-                          <span className="material-symbols-outlined text-[16px]">delete</span>
+                          <span className="material-symbols-outlined text-[16px]">
+                            delete
+                          </span>
                         </button>
                       </div>
                     </div>
@@ -431,11 +452,13 @@ export default function Dashboard() {
                         schedule
                       </span>
                     </div>
-                    <h4 className="font-bold text-text-charcoal mb-2">No schedules yet</h4>
+                    <h4 className="font-bold text-text-charcoal mb-2">
+                      No schedules yet
+                    </h4>
                     <p className="text-text-muted text-sm mb-4">
                       Create your first schedule to automate your commit logs
                     </p>
-                    <button 
+                    <button
                       onClick={() => setIsScheduleModalOpen(true)}
                       className="bg-dashboard-primary text-white text-sm font-bold px-6 py-3 rounded-xl hover:opacity-90 transition-all"
                     >
@@ -449,7 +472,7 @@ export default function Dashboard() {
         </div>
 
         {/* AI Input Bar */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background-light-dash via-background-light-dash to-transparent">
+        <div className="absolute bottom-0 left-0 right-0 p-4 lg:p-6 bg-gradient-to-t from-background-light-dash via-background-light-dash to-transparent">
           <div className="max-w-4xl mx-auto">
             <div className="bg-white border border-border-light rounded-2xl p-2 card-shadow flex items-center gap-3">
               <div className="w-10 h-10 bg-primary-soft rounded-xl flex items-center justify-center shrink-0">
@@ -617,7 +640,15 @@ export default function Dashboard() {
         </div>
       </aside>
 
-      {/* Overlay for mobile */}
+      {/* Overlay for mobile - Left Sidebar */}
+      {isLeftSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setIsLeftSidebarOpen(false)}
+        />
+      )}
+
+      {/* Overlay for mobile - Right Sidebar */}
       {isRightSidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 xl:hidden"
@@ -664,7 +695,7 @@ function ScheduleModal({
 
   const hours = Array.from({ length: 24 }, (_, i) => ({
     value: i.toString(),
-    label: `${i.toString().padStart(2, '0')}:00`,
+    label: `${i.toString().padStart(2, "0")}:00`,
   }));
 
   const days = [
@@ -694,7 +725,7 @@ function ScheduleModal({
       type: selectedFrequency,
       time: selectedHour,
       timezone: detectedTz,
-      ...(selectedFrequency === 'weekly' && { day: selectedDay }),
+      ...(selectedFrequency === "weekly" && { day: selectedDay }),
     };
 
     try {
@@ -965,9 +996,7 @@ function ScheduleModal({
             </button>
             <button
               onClick={handleCreateSchedule}
-              disabled={
-                !selectedRepo || !selectedFrequency || isLoading
-              }
+              disabled={!selectedRepo || !selectedFrequency || isLoading}
               className="flex-1 py-3 px-6 rounded-xl bg-dashboard-primary text-white font-bold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isLoading ? (
