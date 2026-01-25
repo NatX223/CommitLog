@@ -47,7 +47,7 @@ export default function Hero() {
           </div>
 
           {/* Dashboard Preview */}
-          <div className="mt-20 relative">
+          {/* <div className="mt-20 relative">
             <div className="rounded-2xl border border-[#d3e4dd] dark:border-white/10 bg-white/50 dark:bg-white/5 p-2 shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
               <div className="bg-white dark:bg-[#1a1e22] rounded-xl overflow-hidden aspect-video relative flex items-center justify-center border border-[#d3e4dd] dark:border-white/10">
                 <div className="absolute top-0 left-0 w-full h-8 bg-gray-50 dark:bg-black/20 flex items-center px-4 gap-2">
@@ -65,7 +65,7 @@ export default function Hero() {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </section>
 

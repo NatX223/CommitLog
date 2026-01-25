@@ -25,7 +25,7 @@ const Navbar: React.FC = () => {
         <div className="flex items-center gap-4">
           <button
             onClick={() => signIn("github", { callbackUrl: "/dashboard" })}
-            className="hidden sm:block text-sm font-bold"
+            className="text-sm font-bold"
           >
             Log in
           </button>

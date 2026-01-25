@@ -36,9 +36,15 @@ export default function Dashboard() {
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   // const [showSuccess, setShowSuccess] = useState(false);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isLoadingUser, setIsLoadingUser] = useState(false);
+
+  // Settings state
+  const [technicalLevel, setTechnicalLevel] = useState(1); // 0: non-technical, 1: moderately technical, 2: highly technical
+  const [selectedTone, setSelectedTone] = useState("Professional");
+  const [selectedFocus, setSelectedFocus] = useState("The Whole Story");
 
   // Handle authentication and fetch user data
   useEffect(() => {
@@ -224,13 +230,13 @@ export default function Dashboard() {
             <span className="material-symbols-outlined">insights</span>
             <span className="font-medium text-sm tracking-wide">Progress</span>
           </a> */}
-          <a
-            className="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-slate-50 hover:text-text-charcoal transition-all"
-            href="#"
+          {/* <button
+            onClick={() => setShowSettings(true)}
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-slate-50 hover:text-text-charcoal transition-all w-full text-left"
           >
             <span className="material-symbols-outlined">settings</span>
             <span className="font-medium text-sm tracking-wide">Settings</span>
-          </a>
+          </button> */}
         </nav>
 
         {/* <div className="p-4 mt-auto">
@@ -292,17 +298,233 @@ export default function Dashboard() {
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-4 lg:p-8 pb-32">
           <div className="max-w-6xl mx-auto space-y-8">
-            {/* Activity Stream */}
-            <section className="bg-white border border-border-light rounded-3xl p-4 lg:p-6 card-shadow">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 lg:mb-8 gap-4">
-                <h3 className="text-lg lg:text-xl font-bold text-text-charcoal uppercase tracking-tight flex items-center gap-2">
-                  <span className="material-symbols-outlined text-dashboard-primary">
-                    history
-                  </span>
-                  Activity Stream
-                </h3>
-                <div className="flex gap-2">
-                  {/* <button
+            {showSettings ? (
+              /* Settings Component */
+              <div className="space-y-8">
+                {/* Settings Header */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setShowSettings(false)}
+                      className="p-2 text-text-muted hover:text-text-charcoal hover:bg-slate-50 rounded-lg transition-all"
+                    >
+                      <span className="material-symbols-outlined">
+                        arrow_back
+                      </span>
+                    </button>
+                    <div>
+                      <h2 className="text-2xl font-bold text-text-charcoal">
+                        Agent Settings
+                      </h2>
+                      <p className="text-text-muted">
+                        Customize how your AI agent constructs posts
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Technical Level Slider */}
+                <section className="bg-white border border-border-light rounded-3xl p-6 card-shadow">
+                  <h3 className="text-xl font-bold text-text-charcoal mb-4 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-dashboard-primary">
+                      tune
+                    </span>
+                    Technical Level
+                  </h3>
+                  <p className="text-text-muted mb-6">
+                    How technical should your posts be?
+                  </p>
+
+                  <div className="space-y-4">
+                    <div className="flex justify-between text-sm text-text-muted">
+                      <span>Non-Technical</span>
+                      <span>Moderately Technical</span>
+                      <span>Highly Technical</span>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type="range"
+                        min="0"
+                        max="2"
+                        step="1"
+                        value={technicalLevel}
+                        onChange={(e) =>
+                          setTechnicalLevel(parseInt(e.target.value))
+                        }
+                        className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider"
+                      />
+                      <div className="flex justify-between mt-2">
+                        <div
+                          className={`w-4 h-4 rounded-full ${
+                            technicalLevel === 0
+                              ? "bg-dashboard-primary"
+                              : "bg-slate-300"
+                          }`}
+                        ></div>
+                        <div
+                          className={`w-4 h-4 rounded-full ${
+                            technicalLevel === 1
+                              ? "bg-dashboard-primary"
+                              : "bg-slate-300"
+                          }`}
+                        ></div>
+                        <div
+                          className={`w-4 h-4 rounded-full ${
+                            technicalLevel === 2
+                              ? "bg-dashboard-primary"
+                              : "bg-slate-300"
+                          }`}
+                        ></div>
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <span className="text-sm font-semibold text-dashboard-primary">
+                        {technicalLevel === 0
+                          ? "Non-Technical"
+                          : technicalLevel === 1
+                          ? "Moderately Technical"
+                          : "Highly Technical"}
+                      </span>
+                    </div>
+                  </div>
+                </section>
+
+                {/* Tone Selection */}
+                <section className="bg-white border border-border-light rounded-3xl p-6 card-shadow">
+                  <h3 className="text-xl font-bold text-text-charcoal mb-4 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-dashboard-primary">
+                      psychology
+                    </span>
+                    Tone & Style
+                  </h3>
+                  <p className="text-text-muted mb-6">
+                    Choose the personality for your posts
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {[
+                      {
+                        id: "Professional",
+                        label: "Professional",
+                        desc: "Clean, authoritative, and corporate-ready",
+                      },
+                      {
+                        id: "Hype-Man",
+                        label: "Hype-Man",
+                        desc: 'High energy, heavy emoji use, "Build in Public" style',
+                      },
+                      {
+                        id: "Minimalist",
+                        label: "Minimalist",
+                        desc: 'Short, punchy, "no-fluff" technical updates',
+                      },
+                      {
+                        id: "Alpha/Ship",
+                        label: "Alpha/Ship",
+                        desc: 'Aggressive, fast-paced, "Grind" mindset',
+                      },
+                    ].map((tone) => (
+                      <button
+                        key={tone.id}
+                        onClick={() => setSelectedTone(tone.id)}
+                        className={`p-4 rounded-xl border-2 text-left transition-all ${
+                          selectedTone === tone.id
+                            ? "border-green-400 bg-green-50"
+                            : "border-border-light bg-white hover:border-dashboard-primary/30"
+                        }`}
+                      >
+                        <h4 className="font-bold text-text-charcoal mb-1">
+                          {tone.label}
+                        </h4>
+                        <p className="text-sm text-text-muted">{tone.desc}</p>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
+                {/* User Focus */}
+                <section className="bg-white border border-border-light rounded-3xl p-6 card-shadow">
+                  <h3 className="text-xl font-bold text-text-charcoal mb-4 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-dashboard-primary">
+                      center_focus_strong
+                    </span>
+                    Focus Area
+                  </h3>
+                  <p className="text-text-muted mb-6">
+                    What aspects of your work should be highlighted?
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[
+                      {
+                        id: "Feature Velocity",
+                        label: "Feature Velocity",
+                        desc: 'Highlights new buttons, pages, and "visible" stuff',
+                      },
+                      {
+                        id: "Infrastructure & Security",
+                        label: "Infrastructure & Security",
+                        desc: 'Focuses on "under the hood" logic (APIs, DBs, Auth)',
+                      },
+                      {
+                        id: "Performance/Optimization",
+                        label: "Performance/Optimization",
+                        desc: "Prioritizes speed wins, refactoring, and code cleanup",
+                      },
+                      {
+                        id: "Bug Squashing",
+                        label: "Bug Squashing",
+                        desc: 'Focuses on stability and the "war" against errors',
+                      },
+                      {
+                        id: "User Experience (UX/UI)",
+                        label: "User Experience (UX/UI)",
+                        desc: "Focuses on styling, animations, and frontend polish",
+                      },
+                      {
+                        id: "The Whole Story",
+                        label: "The Whole Story",
+                        desc: "A balanced mix of all of the above (Default)",
+                      },
+                    ].map((focus) => (
+                      <button
+                        key={focus.id}
+                        onClick={() => setSelectedFocus(focus.id)}
+                        className={`p-4 rounded-xl border-2 text-left transition-all ${
+                          selectedFocus === focus.id
+                            ? "border-green-400 bg-green-50"
+                            : "border-border-light bg-white hover:border-dashboard-primary/30"
+                        }`}
+                      >
+                        <h4 className="font-bold text-text-charcoal mb-1">
+                          {focus.label}
+                        </h4>
+                        <p className="text-sm text-text-muted">{focus.desc}</p>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
+                {/* Save Settings */}
+                <div className="flex justify-end">
+                  <button className="bg-dashboard-primary text-white font-bold px-8 py-3 rounded-xl hover:opacity-90 transition-all card-shadow">
+                    Save Settings
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* Activity Stream */}
+                <section className="bg-white border border-border-light rounded-3xl p-4 lg:p-6 card-shadow">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 lg:mb-8 gap-4">
+                    <h3 className="text-lg lg:text-xl font-bold text-text-charcoal uppercase tracking-tight flex items-center gap-2">
+                      <span className="material-symbols-outlined text-dashboard-primary">
+                        history
+                      </span>
+                      Activity Stream
+                    </h3>
+                    <div className="flex gap-2">
+                      {/* <button
                     onClick={() => setIsScheduleModalOpen(true)}
                     className="bg-dashboard-primary text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 hover:opacity-90 transition-all card-shadow"
                   >
@@ -311,47 +533,47 @@ export default function Dashboard() {
                     </span>
                     Create Schedule
                   </button> */}
-                </div>
-              </div>
+                    </div>
+                  </div>
 
-              <div className="space-y-2">
-                {activityItems.length > 0 ? (
-                  activityItems.map((item, index) => (
-                    <div
-                      key={index}
-                      className="grid grid-cols-1 lg:grid-cols-12 gap-4 py-5 px-4 hover:bg-slate-50 rounded-2xl transition-all border-b border-slate-50 last:border-none"
-                    >
-                      <div className="lg:col-span-2 flex items-center gap-3">
+                  <div className="space-y-2">
+                    {activityItems.length > 0 ? (
+                      activityItems.map((item, index) => (
                         <div
-                          className={`w-2 h-2 rounded-full ${item.dotColor}`}
-                        ></div>
-                        <span className="text-xs font-mono text-text-muted tracking-tighter uppercase font-semibold">
-                          {item.time}
-                        </span>
-                      </div>
-                      <div className="lg:col-span-6">
-                        <p className="text-sm font-medium text-text-charcoal flex items-center gap-2">
-                          <span
-                            className={`material-symbols-outlined text-[16px] ${item.iconColor}`}
-                          >
-                            {/* {item.icon} */}
-                          </span>
-                          {item.message}
-                        </p>
-                      </div>
-                      <div className="lg:col-span-4 flex items-center justify-start lg:justify-end gap-3">
-                        {item.links?.map((link, linkIndex) => (
-                          <a
-                            key={linkIndex}
-                            className="flex items-center gap-1.5 text-[10px] font-bold text-text-muted hover:text-dashboard-primary bg-slate-100 px-3 py-1.5 rounded-lg transition-colors"
-                            href={typeof link === "object" ? link.url : "#"}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            view tweet
-                          </a>
-                        ))}
-                        {/* {item.xp && (
+                          key={index}
+                          className="grid grid-cols-1 lg:grid-cols-12 gap-4 py-5 px-4 hover:bg-slate-50 rounded-2xl transition-all border-b border-slate-50 last:border-none"
+                        >
+                          <div className="lg:col-span-2 flex items-center gap-3">
+                            <div
+                              className={`w-2 h-2 rounded-full ${item.dotColor}`}
+                            ></div>
+                            <span className="text-xs font-mono text-text-muted tracking-tighter uppercase font-semibold">
+                              {item.time}
+                            </span>
+                          </div>
+                          <div className="lg:col-span-6">
+                            <p className="text-sm font-medium text-text-charcoal flex items-center gap-2">
+                              <span
+                                className={`material-symbols-outlined text-[16px] ${item.iconColor}`}
+                              >
+                                {/* {item.icon} */}
+                              </span>
+                              {item.message}
+                            </p>
+                          </div>
+                          <div className="lg:col-span-4 flex items-center justify-start lg:justify-end gap-3">
+                            {item.links?.map((link, linkIndex) => (
+                              <a
+                                key={linkIndex}
+                                className="flex items-center gap-1.5 text-[10px] font-bold text-text-muted hover:text-dashboard-primary bg-slate-100 px-3 py-1.5 rounded-lg transition-colors"
+                                href={typeof link === "object" ? link.url : "#"}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                view tweet
+                              </a>
+                            ))}
+                            {/* {item.xp && (
                           <span
                             className={`text-[10px] font-bold px-2 py-1.5 rounded-lg tracking-widest ${
                               item.xpColor ||
@@ -361,113 +583,116 @@ export default function Dashboard() {
                             {item.xp}
                           </span>
                         )} */}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                      <span className="material-symbols-outlined text-slate-400 text-[32px]">
-                        history
-                      </span>
-                    </div>
-                    <h4 className="font-bold text-text-charcoal mb-2">
-                      No activity yet
-                    </h4>
-                    <p className="text-text-muted text-sm">
-                      Your commit history and activity will appear here
-                    </p>
-                  </div>
-                )}
-              </div>
-            </section>
-
-            {/* Schedules Section */}
-            <section className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <h3 className="text-lg lg:text-xl font-bold text-text-charcoal uppercase tracking-tight flex items-center gap-2">
-                  <span className="material-symbols-outlined text-dashboard-primary">
-                    schedule
-                  </span>
-                  Schedules
-                </h3>
-                <button
-                  onClick={() => setIsScheduleModalOpen(true)}
-                  className="bg-dashboard-primary text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 hover:opacity-90 transition-all card-shadow w-fit"
-                >
-                  <span className="material-symbols-outlined text-[16px]">
-                    add
-                  </span>
-                  Create Schedule
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {userData?.schedules && userData.schedules.length > 0 ? (
-                  userData.schedules.map((schedule, index) => (
-                    <div
-                      key={index}
-                      className="bg-white border border-border-light rounded-2xl p-5 card-shadow"
-                    >
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="p-2 rounded-lg bg-primary-soft">
-                          <span className="material-symbols-outlined text-[20px] text-dashboard-primary">
-                            {schedule.type === "daily"
-                              ? "today"
-                              : "calendar_month"}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-12">
+                        <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                          <span className="material-symbols-outlined text-slate-400 text-[32px]">
+                            history
                           </span>
                         </div>
-                        <span className="text-[10px] font-bold px-2 py-1 rounded text-dashboard-primary bg-primary-soft">
-                          {schedule.type.toUpperCase()}
-                        </span>
+                        <h4 className="font-bold text-text-charcoal mb-2">
+                          No activity yet
+                        </h4>
+                        <p className="text-text-muted text-sm">
+                          Your commit history and activity will appear here
+                        </p>
                       </div>
-                      <h4 className="font-bold text-text-charcoal mb-1">
-                        {schedule.repo}
-                      </h4>
-                      <p className="text-xs text-text-muted mb-4 leading-relaxed">
-                        {schedule.type === "daily"
-                          ? `Posts daily at ${
-                              schedule.time + ":00" || "9:00 AM"
-                            }`
-                          : `Posts weekly on ${schedule.day || "Monday"} at ${
-                              schedule.time + ":00" || "9:00 AM"
-                            }`}
-                      </p>
-                      <div className="flex justify-between items-center">
-                        <span className="text-[10px] font-bold text-text-muted uppercase">
-                          Active
-                        </span>
-                        <button className="text-text-muted hover:text-red-500 transition-colors">
-                          <span className="material-symbols-outlined text-[16px]">
-                            delete
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="col-span-full text-center py-12">
-                    <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                      <span className="material-symbols-outlined text-slate-400 text-[32px]">
+                    )}
+                  </div>
+                </section>
+
+                {/* Schedules Section */}
+                <section className="space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <h3 className="text-lg lg:text-xl font-bold text-text-charcoal uppercase tracking-tight flex items-center gap-2">
+                      <span className="material-symbols-outlined text-dashboard-primary">
                         schedule
                       </span>
-                    </div>
-                    <h4 className="font-bold text-text-charcoal mb-2">
-                      No schedules yet
-                    </h4>
-                    <p className="text-text-muted text-sm mb-4">
-                      Create your first schedule to automate your commit logs
-                    </p>
+                      Schedules
+                    </h3>
                     <button
                       onClick={() => setIsScheduleModalOpen(true)}
-                      className="bg-dashboard-primary text-white text-sm font-bold px-6 py-3 rounded-xl hover:opacity-90 transition-all"
+                      className="bg-dashboard-primary text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 hover:opacity-90 transition-all card-shadow w-fit"
                     >
+                      <span className="material-symbols-outlined text-[16px]">
+                        add
+                      </span>
                       Create Schedule
                     </button>
                   </div>
-                )}
-              </div>
-            </section>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {userData?.schedules && userData.schedules.length > 0 ? (
+                      userData.schedules.map((schedule, index) => (
+                        <div
+                          key={index}
+                          className="bg-white border border-border-light rounded-2xl p-5 card-shadow"
+                        >
+                          <div className="flex justify-between items-start mb-4">
+                            <div className="p-2 rounded-lg bg-primary-soft">
+                              <span className="material-symbols-outlined text-[20px] text-dashboard-primary">
+                                {schedule.type === "daily"
+                                  ? "today"
+                                  : "calendar_month"}
+                              </span>
+                            </div>
+                            <span className="text-[10px] font-bold px-2 py-1 rounded text-dashboard-primary bg-primary-soft">
+                              {schedule.type.toUpperCase()}
+                            </span>
+                          </div>
+                          <h4 className="font-bold text-text-charcoal mb-1">
+                            {schedule.repo}
+                          </h4>
+                          <p className="text-xs text-text-muted mb-4 leading-relaxed">
+                            {schedule.type === "daily"
+                              ? `Posts daily at ${
+                                  schedule.time + ":00" || "9:00 AM"
+                                }`
+                              : `Posts weekly on ${
+                                  schedule.day || "Monday"
+                                } at ${schedule.time + ":00" || "9:00 AM"}`}
+                          </p>
+                          <div className="flex justify-between items-center">
+                            <span className="text-[10px] font-bold text-text-muted uppercase">
+                              Active
+                            </span>
+                            <button className="text-text-muted hover:text-red-500 transition-colors">
+                              <span className="material-symbols-outlined text-[16px]">
+                                delete
+                              </span>
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="col-span-full text-center py-12">
+                        <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                          <span className="material-symbols-outlined text-slate-400 text-[32px]">
+                            schedule
+                          </span>
+                        </div>
+                        <h4 className="font-bold text-text-charcoal mb-2">
+                          No schedules yet
+                        </h4>
+                        <p className="text-text-muted text-sm mb-4">
+                          Create your first schedule to automate your commit
+                          logs
+                        </p>
+                        <button
+                          onClick={() => setIsScheduleModalOpen(true)}
+                          className="bg-dashboard-primary text-white text-sm font-bold px-6 py-3 rounded-xl hover:opacity-90 transition-all"
+                        >
+                          Create Schedule
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </section>
+              </>
+            )}
           </div>
         </div>
 
