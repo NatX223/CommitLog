@@ -16,8 +16,6 @@ router.get('/api/user', async (req, res) => {
 
     try {
         const userDoc = await firebaseService.getDocument<userData>('users', userId);
-        const userSchedules = await firebaseService.getSubcollectionDocuments<userSchedule>('users', userId, 'schedules');
-        const userHistory = await firebaseService.getSubcollectionDocuments<historySchema>('users', userId, 'history');
 
         if (!userDoc) {
             console.log("error");
@@ -30,8 +28,17 @@ router.get('/api/user', async (req, res) => {
         const hasGithub = !!userDoc.connectedAccounts?.github;
         const hasX = !!userDoc.connectedAccounts?.x;
 
-        const userRepos = await githubService.getUserRepositories(userDoc.connectedAccounts?.github?.accessToken!, username);
+        let userRepos;
+        let userSchedules;
+        let userHistory;
 
+        if (hasGithub) {
+            userRepos = await githubService.getUserRepositories(userDoc.connectedAccounts?.github?.accessToken!, username);
+            userSchedules = await firebaseService.getSubcollectionDocuments<userSchedule>('users', userId, 'schedules');
+            userHistory = await firebaseService.getSubcollectionDocuments<historySchema>('users', userId, 'history');
+        }
+
+        
         const userData = {
             userId,
             username,

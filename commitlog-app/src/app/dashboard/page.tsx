@@ -11,11 +11,11 @@ interface UserData {
   avatarUrl: string;
   hasGithub: boolean;
   hasX: boolean;
-  repos: Array<{
+  repos?: Array<{
     name: string;
     description: string;
   }>;
-  schedules: Array<{
+  schedules?: Array<{
     id: string;
     repo: string;
     type: string;
@@ -23,7 +23,7 @@ interface UserData {
     day?: string;
     createdAt?: string;
   }>;
-  history: Array<{
+  history?: Array<{
     content: string;
     link: string;
     timestamp: Date;
