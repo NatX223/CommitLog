@@ -17,6 +17,8 @@
   "license": "ISC",
   "dependencies": {
     "@ai-sdk/google": "^3.0.10",
+    "@opentelemetry/auto-instrumentations-node": "^0.69.0",
+    "@opentelemetry/sdk-node": "^0.211.0",
     "@twitter-api-v2/plugin-token-refresher": "^1.0.0",
     "ai": "^6.0.38",
     "axios": "^1.12.2",
@@ -32,6 +34,8 @@
     "mailersend": "^2.3.0",
     "node-cron": "^3.0.3",
     "octokit": "^5.0.5",
+    "opik": "^1.9.102",
+    "opik-vercel": "^1.9.102",
     "twitter-api-v2": "^1.29.0",
     "zod": "^4.3.5"
   },

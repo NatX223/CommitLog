@@ -9,8 +9,13 @@ import { firebaseService } from './firebaseService.js';
 import userData from '../models/userSchema.js';
 import postSchedule from '../models/postSchedule.js';
 import { githubService } from './githubservice.js';
+import { sdk } from './opikService.js';
+import { OpikExporter } from 'opik-vercel';
+
+// sdk.start();
 
 export async function hourlyPosts() {
+  sdk.start();
   const currentUtcHour = new Date().getUTCHours();
 
   console.log(`⏳ Starting Agent Batch for UTC Hour: ${currentUtcHour}:00`);
@@ -61,6 +66,10 @@ export async function hourlyPosts() {
             
             // The prompt that kicks off the chain of events
             prompt: `Please check the latest commits for ${username}/${repo} and post a Build-in-Public update to X.`,
+
+            experimental_telemetry: OpikExporter.getSettings({
+              name: "daily-posts-trace",
+            }),
             
             // Enable multi-step tool calls (The "Step Management")
             stopWhen: stepCountIs(5), 
@@ -76,6 +85,8 @@ export async function hourlyPosts() {
         // 5. Send response back to client
         // 'text' will contain the final response from the agent (e.g., "I've posted your update!")
         console.log('Agent finished:', text, steps);
+
+        await sdk.shutdown();
 
       } catch (err) {
         console.error(`❌ Error in dailyPost for user ${userId}:`, err);
@@ -93,6 +104,7 @@ export async function hourlyPosts() {
 }
 
 export async function weeklyPosts() {
+  sdk.start();
   const now = DateTime.now().toUTC();
   const currentUtcHour = now.hour;
   const currentDayName = now.weekdayLong;
@@ -128,7 +140,7 @@ export async function weeklyPosts() {
         console.log(`Processing user: ${userId}`);
 
         const systemPrompt = `
-            ${dailyPostPrompt}
+            ${weeklyPostPrompt}
             
             CURRENT CONTEXT:
             - User: ${username}
@@ -147,6 +159,10 @@ export async function weeklyPosts() {
             // The prompt that kicks off the chain of events
             prompt: `Please check the latest commits for ${username}/${repo} and post a Build-in-Public update to X.`,
             
+            experimental_telemetry: OpikExporter.getSettings({
+              name: "weekly-posts-trace",
+            }),
+
             // Enable multi-step tool calls (The "Step Management")
             stopWhen: stepCountIs(5), 
 
@@ -161,6 +177,8 @@ export async function weeklyPosts() {
         // 5. Send response back to client
         // 'text' will contain the final response from the agent (e.g., "I've posted your update!")
         console.log('Agent finished:', text, steps);
+
+        await sdk.shutdown();
 
       } catch (err) {
         console.error(`❌ Error in dailyPost for user ${userId}:`, err);
