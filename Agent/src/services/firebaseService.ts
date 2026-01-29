@@ -259,6 +259,7 @@ if (!admin.apps.length) {
       parentCollection: string,
       parentDocId: string,
       subcollection: string,
+      subDocId: string,
       data: T
     ): Promise<string> {
       try {
@@ -266,13 +267,13 @@ if (!admin.apps.length) {
           .doc(parentDocId)
           .collection(subcollection);
   
-        const docRef = await subcollectionRef.add({
+        await subcollectionRef.doc(subDocId).set({
           ...data,
           createdAt: Timestamp.now(),
           updatedAt: Timestamp.now()
         });
   
-        return docRef.id;
+        return subDocId;
       } catch (error) {
         throw new Error(`Failed to add to subcollection ${subcollection}: ${error}`);
       }

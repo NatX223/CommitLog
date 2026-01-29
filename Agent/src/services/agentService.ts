@@ -9,12 +9,33 @@ import { firebaseService } from './firebaseService.js';
 import userData from '../models/userSchema.js';
 import postSchedule from '../models/postSchedule.js';
 import { githubService } from './githubservice.js';
-import { sdk } from './opikService.js';
+import { opikClient } from './opikService.js';
 import { OpikExporter } from 'opik-vercel';
-
-// sdk.start();
+import { randomInt } from 'crypto';
+import { api, NodeSDK } from "@opentelemetry/sdk-node";
+import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
 
 export async function hourlyPosts() {
+
+  const num = randomInt(0, 100000);
+
+  const secureId = num.toString().padStart(5, '0');
+
+  const traceExporter = new OpikExporter({
+    client: opikClient,
+    tags: ["hackathon", "commit-to-change", secureId],
+    metadata: {
+      environment: "production",
+      version: "0.1.0",
+    //   team: "natx223",
+    }
+  });
+
+  const sdk = new NodeSDK({
+    traceExporter: traceExporter,
+    instrumentations: [getNodeAutoInstrumentations()],
+  });
+
   sdk.start();
   const currentUtcHour = new Date().getUTCHours();
 
@@ -54,6 +75,7 @@ export async function hourlyPosts() {
             - User: ${username}
             - UserId: ${userId}
             - Repository: ${repo}
+            - subDocId: ${secureId}
             - Timeframe: Last 1 day
             
             GOAL: Retrieve commits, write a post, publish it to X and record it in user history.
@@ -104,6 +126,25 @@ export async function hourlyPosts() {
 }
 
 export async function weeklyPosts() {
+  const num = randomInt(0, 100000);
+
+  const secureId = num.toString().padStart(5, '0');
+
+  const traceExporter = new OpikExporter({
+    client: opikClient,
+    tags: ["hackathon", "commit-to-change", secureId],
+    metadata: {
+      environment: "production",
+      version: "0.1.0",
+    //   team: "natx223",
+    }
+  });
+
+  const sdk = new NodeSDK({
+    traceExporter: traceExporter,
+    instrumentations: [getNodeAutoInstrumentations()],
+  });
+
   sdk.start();
   const now = DateTime.now().toUTC();
   const currentUtcHour = now.hour;
@@ -146,6 +187,7 @@ export async function weeklyPosts() {
             - User: ${username}
             - UserId: ${userId}
             - Repository: ${repo}
+            - subDocId: ${secureId}
             - Timeframe: Last 7 days
             
             GOAL: Retrieve commits, write a post, and publish it to X and record it in user history.

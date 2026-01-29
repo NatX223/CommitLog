@@ -9,6 +9,7 @@
     "start:worker": "node dist/agent-worker.js",
     "dev": "tsx watch src/server.ts",
     "dev:worker": "tsx watch src/agent-worker.ts",
+    "dev:trace": "tsx watch src/getTraces.ts",
     "build": "tsc",
     "test": "jest"
   },
@@ -32,6 +33,7 @@
     "jsonwebtoken": "^9.0.2",
     "luxon": "^3.7.2",
     "mailersend": "^2.3.0",
+    "nanoid": "^5.1.6",
     "node-cron": "^3.0.3",
     "octokit": "^5.0.5",
     "opik": "^1.9.102",
