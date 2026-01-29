@@ -12,7 +12,7 @@ export const recordHistory = tool({
   execute: async ({ tweet, userId, tweetLink }) => {
     try {
 
-      await firebaseService.addToSubcollection('user', userId, 'history', { content: tweet, link: tweetLink, timestamp: new Date() });
+      await firebaseService.addToSubcollection('users', userId, 'history', { content: tweet, link: tweetLink, timestamp: new Date() });
       return {
         result: "post history saved successfully"
       }

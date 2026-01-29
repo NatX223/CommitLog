@@ -56,7 +56,7 @@ export async function hourlyPosts() {
             - Repository: ${repo}
             - Timeframe: Last 1 day
             
-            GOAL: Retrieve commits, write a post, and publish it to X.
+            GOAL: Retrieve commits, write a post, publish it to X and record it in user history.
         `;
 
         const { text, steps } = await generateText({
@@ -65,7 +65,7 @@ export async function hourlyPosts() {
             system: systemPrompt,
             
             // The prompt that kicks off the chain of events
-            prompt: `Please check the latest commits for ${username}/${repo} and post a Build-in-Public update to X.`,
+            prompt: `Please check the latest commits for ${username}/${repo}, post a Build-in-Public update to X and record it in user history.`,
 
             experimental_telemetry: OpikExporter.getSettings({
               name: "daily-posts-trace",
@@ -148,7 +148,7 @@ export async function weeklyPosts() {
             - Repository: ${repo}
             - Timeframe: Last 7 days
             
-            GOAL: Retrieve commits, write a post, and publish it to X.
+            GOAL: Retrieve commits, write a post, and publish it to X and record it in user history.
         `;
 
         const { text, steps } = await generateText({
@@ -157,7 +157,7 @@ export async function weeklyPosts() {
             system: systemPrompt,
             
             // The prompt that kicks off the chain of events
-            prompt: `Please check the latest commits for ${username}/${repo} and post a Build-in-Public update to X.`,
+            prompt: `Please check the latest commits for ${username}/${repo} and post a Build-in-Public update to X and record it in user history.`,
             
             experimental_telemetry: OpikExporter.getSettings({
               name: "weekly-posts-trace",
