@@ -23,4 +23,6 @@ router.post('/api/feedback', async (req, res) => {
         console.error('Error creating schedule:', error);
         res.status(500).json({ error: 'Failed to create schedule' });
     }
-})
+});
+
+export default router;
