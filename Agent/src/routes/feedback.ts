@@ -18,6 +18,9 @@ router.post('/api/feedback', async (req, res) => {
         console.log("feedback recorded successfully");
 
         if (score >= 0.5) {
+          console.log(score);
+          console.log(responseId);
+          
           const traceTag = Number(responseId);
           const traces = await opikClient.searchTraces({
             projectName: "CommitLog",
@@ -32,6 +35,8 @@ router.post('/api/feedback', async (req, res) => {
             feedbackScore: trace.feedbackScores
           }));
           const commitLogDataset = await opikClient.getDataset("commitlog-baseline");
+
+          console.log(trace);
 
           await commitLogDataset.insert(trace);
         }
