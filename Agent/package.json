@@ -10,6 +10,7 @@
     "dev": "tsx watch src/server.ts",
     "dev:worker": "tsx watch src/agent-worker.ts",
     "dev:trace": "tsx watch src/getTraces.ts",
+    "dev:dataset": "tsx watch src/Opik/dataset",
     "build": "tsc",
     "test": "jest"
   },
