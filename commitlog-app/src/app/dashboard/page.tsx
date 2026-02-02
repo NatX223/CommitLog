@@ -24,6 +24,7 @@ interface UserData {
     createdAt?: string;
   }>;
   history?: Array<{
+    id?: string;
     content: string;
     link: string;
     timestamp: Date;
@@ -37,6 +38,12 @@ export default function Dashboard() {
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [feedbackModal, setFeedbackModal] = useState({
+    isOpen: false,
+    itemId: "",
+    currentRating: 0,
+  });
+  const [itemRatings, setItemRatings] = useState<Record<string, number>>({});
   // const [showSuccess, setShowSuccess] = useState(false);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isLoadingUser, setIsLoadingUser] = useState(false);
@@ -122,15 +129,23 @@ export default function Dashboard() {
 
   // Process history data for activity items
   const activityItems =
-    userData?.history?.map((historyItem) => ({
-      time: formatTimestamp(historyItem.timestamp),
-      // type: "commit",
-      message: historyItem.content,
-      // icon: "commit",
-      iconColor: "text-text-muted",
-      dotColor: "bg-dashboard-primary",
-      links: historyItem.link ? [{ label: "VIEW", url: historyItem.link }] : [],
-    })) || [];
+    userData?.history?.map((historyItem, index) => {
+      // Use the actual document ID if available, otherwise fall back to index-based ID
+      const itemId = historyItem.id || `history-${index}`;
+      
+      return {
+        id: itemId,
+        time: formatTimestamp(historyItem.timestamp),
+        // type: "commit",
+        message: historyItem.content,
+        // icon: "commit",
+        iconColor: "text-text-muted",
+        dotColor: "bg-dashboard-primary",
+        links: historyItem.link ? [{ label: "VIEW", url: historyItem.link }] : [],
+        isAgentGenerated: true, // Mark as agent-generated for rating
+        userRating: itemRatings[itemId] || 0,
+      };
+    }) || [];
 
   const integrations = [
     {
@@ -191,14 +206,82 @@ export default function Dashboard() {
       if (response.ok) {
         const data = await response.json();
         if (data.success && data.redirectUrl) {
-          // Navigate to the github OAuth URL
+          // Navigate to the GitHub OAuth URL
           window.location.href = data.redirectUrl;
         }
       } else {
-        console.error("Failed to initiate github integration");
+        console.error("Failed to initiate GitHub integration");
       }
     } catch (error) {
-      console.error("Error connecting to github:", error);
+      console.error("Error connecting to GitHub:", error);
+    }
+  };
+
+  // Handle rating submission
+  const handleRating = async (itemId: string, score: number) => {
+    try {
+      // Update local state immediately for better UX
+      setItemRatings((prev) => ({ ...prev, [itemId]: score }));
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_AGENT_URL}/api/feedback`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: userData?.userId,
+            responseId: itemId,
+            score: score / 5, // Convert 1-5 scale to 0-1 scale for backend
+            improvement: "",
+          }),
+        }
+      );
+
+      if (response.ok) {
+        console.log("Rating submitted successfully");
+      } else {
+        console.error("Failed to submit rating", response.status, response.statusText);
+        // Don't revert state on API error - keep the UI rating
+      }
+    } catch (error) {
+      console.error("Error submitting rating:", error);
+      // Don't revert state on network error - keep the UI rating
+    }
+  };
+
+  // Handle detailed feedback submission
+  const handleDetailedFeedback = async (
+    itemId: string,
+    score: number,
+    improvement: string
+  ) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_AGENT_URL}/api/feedback`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: userData?.userId,
+            responseId: itemId,
+            score: score / 5, // Convert 1-5 scale to 0-1 scale for backend
+            improvement,
+          }),
+        }
+      );
+
+      if (response.ok) {
+        console.log("Detailed feedback submitted successfully");
+        setFeedbackModal({ isOpen: false, itemId: "", currentRating: 0 });
+      } else {
+        console.error("Failed to submit detailed feedback");
+      }
+    } catch (error) {
+      console.error("Error submitting detailed feedback:", error);
     }
   };
 
@@ -702,6 +785,44 @@ export default function Dashboard() {
                               </span>
                               {item.message}
                             </p>
+                            {item.isAgentGenerated && (
+                              <div className="mt-2 flex items-center gap-2">
+                                <span className="text-xs text-text-muted">
+                                  Rate this post:
+                                </span>
+                                <div className="flex items-center gap-1">
+                                  {[1, 2, 3, 4, 5].map((star) => (
+                                    <button
+                                      key={star}
+                                      onClick={() =>
+                                        handleRating(item.id, star)
+                                      }
+                                      className={`text-sm transition-colors ${
+                                        (item.userRating || 0) >= star
+                                          ? "text-yellow-400 hover:text-yellow-500"
+                                          : "text-gray-300 hover:text-yellow-300"
+                                      }`}
+                                    >
+                                      ★
+                                    </button>
+                                  ))}
+                                </div>
+                                {item.userRating && (
+                                  <button
+                                    onClick={() =>
+                                      setFeedbackModal({
+                                        isOpen: true,
+                                        itemId: item.id,
+                                        currentRating: item.userRating,
+                                      })
+                                    }
+                                    className="text-xs text-dashboard-primary hover:underline ml-2"
+                                  >
+                                    Add feedback
+                                  </button>
+                                )}
+                              </div>
+                            )}
                           </div>
                           <div className="lg:col-span-4 flex items-center justify-start lg:justify-end gap-3">
                             {item.links?.map((link, linkIndex) => (
@@ -990,6 +1111,104 @@ export default function Dashboard() {
           onClose={() => setIsScheduleModalOpen(false)}
           userData={userData}
         />
+      )}
+
+      {/* Feedback Modal */}
+      {feedbackModal.isOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-text-charcoal">
+                Provide Feedback
+              </h3>
+              <button
+                onClick={() =>
+                  setFeedbackModal({
+                    isOpen: false,
+                    itemId: "",
+                    currentRating: 0,
+                  })
+                }
+                className="p-2 text-text-muted hover:text-text-charcoal hover:bg-slate-50 rounded-lg transition-all"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-text-charcoal mb-2">
+                  Your Rating
+                </label>
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      onClick={() =>
+                        setFeedbackModal((prev) => ({
+                          ...prev,
+                          currentRating: star,
+                        }))
+                      }
+                      className={`text-xl transition-colors ${
+                        feedbackModal.currentRating >= star
+                          ? "text-yellow-400 hover:text-yellow-500"
+                          : "text-gray-300 hover:text-yellow-300"
+                      }`}
+                    >
+                      ★
+                    </button>
+                  ))}
+                  <span className="ml-2 text-sm text-text-muted">
+                    {feedbackModal.currentRating}/5
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-text-charcoal mb-2">
+                  How can we improve? (Optional)
+                </label>
+                <textarea
+                  id="improvement-feedback"
+                  rows={3}
+                  className="w-full p-3 border border-border-light rounded-lg text-text-charcoal focus:ring-2 focus:ring-dashboard-primary focus:border-dashboard-primary resize-none"
+                  placeholder="Share your thoughts on how we can make this better..."
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() =>
+                    setFeedbackModal({
+                      isOpen: false,
+                      itemId: "",
+                      currentRating: 0,
+                    })
+                  }
+                  className="flex-1 py-2 px-4 rounded-lg border border-border-light text-text-muted font-semibold hover:bg-slate-50 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    const textarea = document.getElementById(
+                      "improvement-feedback"
+                    ) as HTMLTextAreaElement;
+                    handleDetailedFeedback(
+                      feedbackModal.itemId,
+                      feedbackModal.currentRating,
+                      textarea.value
+                    );
+                  }}
+                  className="flex-1 py-2 px-4 rounded-lg bg-dashboard-primary text-white font-semibold hover:opacity-90 transition-all"
+                >
+                  Submit Feedback
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

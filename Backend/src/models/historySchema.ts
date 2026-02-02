@@ -1,2 +1,7 @@
-interface historySchema { content: string, link: string, timestamp: Date }
+interface historySchema { 
+  id?: string;
+  content: string; 
+  link: string; 
+  timestamp: Date;
+}
 export default historySchema;
