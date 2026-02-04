@@ -3,9 +3,7 @@ import { Opik, EvaluationTask } from "opik";
 import { generateText, tool, stepCountIs  } from 'ai';
 import { google } from '@ai-sdk/google';
 import dotenv from 'dotenv';
-import { dailyPostPrompt, weeklyPostPrompt } from "../constants";
-import { time } from "console";
-import { getLatestCommits } from "../tools/github/commit_info_tool";
+import { getLatestCommits } from "../tools/github/commit_info_tool.js";
   
 dotenv.config();
 
