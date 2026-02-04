@@ -2,9 +2,11 @@ import { OpikExporter } from "opik-vercel";
 import { Opik, EvaluationTask } from "opik";
 import { generateText, tool, stepCountIs  } from 'ai';
 import { google } from '@ai-sdk/google';
+import { GoogleGenAI } from "@google/genai";
+import { trackGemini } from "opik-gemini";
 import dotenv from 'dotenv';
 import { getLatestCommits } from "../tools/github/commit_info_tool.js";
-  
+
 dotenv.config();
 
 export type JsonListStringPublic = Record<string, unknown> | Record<string, unknown>[] | string;
@@ -73,19 +75,20 @@ export const traceExporter = new OpikExporter({
     // Optional: associate traces with a conversation thread
     // threadId: "conversation-123",
 });
-  
+
 export const llmTask: EvaluationTask<DatasetItem> = async (datasetItem) => {
   const _prompt = datasetItem.input;
-  const { text, steps } = await generateText({
-    model: google('gemini-2.5-flash'),
-    
-    prompt: String(_prompt),
-    
-    stopWhen: stepCountIs(5), 
+  const genAI = new GoogleGenAI({
+    apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+  });
+  const trackedGenAI = trackGemini(genAI);
 
-    tools: {
-        getLatestCommits
-    },
-});
-  return { output: text };
+  const response = await trackedGenAI.models.generateContent({
+    model: "gemini-2.0-flash-001",
+    contents: [{ role: 'user', parts: [{ text: String(_prompt) }] }]
+  });
+  
+  console.log(response.text);
+
+  return { output: response.text };
 };
