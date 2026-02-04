@@ -63,8 +63,8 @@ router.post('/api/feedback', async (req, res) => {
         res.status(200).json({ message: 'Feedback recorded successfully' });
 
     } catch (error) {
-        console.error('Error creating schedule:', error);
-        res.status(500).json({ error: 'Failed to create schedule' });
+        console.error('Error giving feedback:', error);
+        res.status(500).json({ error: 'Failed to give feedback' });
     }
 });
 
