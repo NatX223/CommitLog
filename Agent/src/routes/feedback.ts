@@ -1,8 +1,16 @@
 import express from 'express';
 import { firebaseService } from '../services/firebaseService.js';
-import { opikClient } from '../services/opikService.js';
+import { FeedbackScorePublic, JsonListStringPublic, llmTask, opikClient } from '../services/opikService.js';
+import { evaluate, EvaluateOptions, Hallucination, AnswerRelevance } from "opik";
 
 const router = express.Router();
+
+
+type DatasetItem = {
+    input: JsonListStringPublic | undefined;
+    output: JsonListStringPublic | undefined;
+    feedbackScore: FeedbackScorePublic[] | undefined;
+}
 
 router.post('/api/feedback', async (req, res) => {
     const { userId, responseId, score, improvement } = req.body;
@@ -17,28 +25,39 @@ router.post('/api/feedback', async (req, res) => {
 
         console.log("feedback recorded successfully");
 
-        if (score >= 0.5) {
-          console.log(score);
-          console.log(responseId);
+        const traceTag = Number(responseId);
+        const traces = await opikClient.searchTraces({
+          projectName: "CommitLog",
+          maxResults: 1,
+          filterString: `tags contains ${traceTag}`
+        });
           
-          const traceTag = Number(responseId);
-          const traces = await opikClient.searchTraces({
-            projectName: "CommitLog",
-            maxResults: 1,
-              
-            filterString: `tags contains ${traceTag}`
-          });
-            
-          const trace = traces.map(trace => ({
-            input: trace.input,
-            output: trace.output,
-            feedbackScore: trace.feedbackScores
-          }));
-          const commitLogDataset = await opikClient.getDataset("commitlog-baseline");
+        const trace = traces.map(trace => ({
+          input: trace.input,
+          output: trace.output,
+          feedbackScore: trace.feedbackScores
+        }));
+        const commitLogDataset = await opikClient.getDataset<DatasetItem>("commitlog-baseline");
 
-          console.log(trace);
+        console.log(trace);
 
+        if (score >= 0.5) {          
           await commitLogDataset.insert(trace);
+        }
+        else{
+          const hallucination = new Hallucination();
+          const answerrelevance = new AnswerRelevance();
+
+          const evaluationResult = await evaluate({
+            dataset: commitLogDataset,
+            task: llmTask, 
+            scoringMetrics: [hallucination, answerrelevance], 
+            projectName: "CommitLog", 
+            experimentName: "CommitLogExperiment", 
+            client: opikClient
+          });
+          console.log(`Experiment ID: ${evaluationResult.experimentId}`);
+          console.log(`Total test cases: ${evaluationResult.testResults.length}`);
         }
 
         res.status(200).json({ message: 'Feedback recorded successfully' });
