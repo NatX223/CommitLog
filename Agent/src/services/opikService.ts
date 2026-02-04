@@ -81,13 +81,13 @@ export const llmTask: EvaluationTask<DatasetItem> = async (datasetItem) => {
   const genAI = new GoogleGenAI({
     apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
   });
-  const trackedGenAI = trackGemini(genAI);
+  // const trackedGenAI = trackGemini(genAI);
 
-  const response = await trackedGenAI.models.generateContent({
+  const response = await genAI.models.generateContent({
     model: "gemini-2.0-flash-001",
     contents: [{ role: 'user', parts: [{ text: String(_prompt) }] }]
   });
-  
+
   console.log(response.text);
 
   return { output: response.text };
