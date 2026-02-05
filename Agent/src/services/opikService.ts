@@ -93,7 +93,7 @@ export const llmTask: EvaluationTask<DatasetItem> = async (datasetItem) => {
     contents: [{ role: 'user', parts: [{ text: String(_prompt) }] }]
   });
 
-  console.log(`input:${_prompt}`);
+  console.log(`input-prompt:${_prompt}`);
   console.log(`output:${response.text}`);
   
 
