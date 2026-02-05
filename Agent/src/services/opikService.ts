@@ -76,8 +76,12 @@ export const traceExporter = new OpikExporter({
     // threadId: "conversation-123",
 });
 
+// const genAI = new GoogleGenAI({
+//   apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+// });
+
 const genAI = new GoogleGenAI({
-  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 export const llmTask: EvaluationTask<DatasetItem> = async (datasetItem) => {
