@@ -86,14 +86,15 @@ const genAI = new GoogleGenAI({
 
 export const llmTask: EvaluationTask<DatasetItem> = async (datasetItem) => {
   const _prompt = datasetItem.input;
+  const messages = JSON.stringify(_prompt)
   // const trackedGenAI = trackGemini(genAI);
 
   const response = await genAI.models.generateContent({
     model: "gemini-2.5-flash",
-    contents: [{ role: 'user', parts: [{ text: String(_prompt) }] }]
+    contents: [{ role: 'user', parts: [{ text: String(messages) }] }]
   });
 
-  console.log(`input-prompt:${_prompt}`);
+  console.log(`input:${messages}`);
   console.log(`output:${response.text}`);
   
 
