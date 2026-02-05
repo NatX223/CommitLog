@@ -4,6 +4,7 @@ import { generateText, tool, stepCountIs  } from 'ai';
 import { dailyPostPrompt } from '../constants.js';
 import { getLatestCommits } from '../tools/github/commit_info_tool.js';
 import { postTweet } from '../tools/post/x_post_tool.js';
+import { recordHistory } from '../tools/record/record_history_tool.js';
 
 const router = Router();
 
@@ -42,7 +43,7 @@ router.get('/agent/dailyPost', async (req, res) => {
             // 4. Tool Definitions
             tools: {
                 getLatestCommits,
-                postTweet
+                recordHistory
             },
         });
 
