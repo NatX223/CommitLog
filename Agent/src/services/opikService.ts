@@ -76,15 +76,16 @@ export const traceExporter = new OpikExporter({
     // threadId: "conversation-123",
 });
 
+const genAI = new GoogleGenAI({
+  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+});
+
 export const llmTask: EvaluationTask<DatasetItem> = async (datasetItem) => {
   const _prompt = datasetItem.input;
-  const genAI = new GoogleGenAI({
-    apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
-  });
   // const trackedGenAI = trackGemini(genAI);
 
   const response = await genAI.models.generateContent({
-    model: "gemini-2.0-flash-001",
+    model: "gemini-2.5-flash",
     contents: [{ role: 'user', parts: [{ text: String(_prompt) }] }]
   });
 
