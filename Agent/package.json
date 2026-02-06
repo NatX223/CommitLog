@@ -38,9 +38,9 @@
     "nanoid": "^5.1.6",
     "node-cron": "^3.0.3",
     "octokit": "^5.0.5",
-    "opik": "^1.9.102",
-    "opik-gemini": "^1.10.5",
-    "opik-vercel": "^1.9.102",
+    "opik": "^1.10.7",
+    "opik-gemini": "^1.10.7",
+    "opik-vercel": "^1.10.7",
     "twitter-api-v2": "^1.29.0",
     "zod": "^4.3.5"
   },

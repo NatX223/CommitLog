@@ -772,9 +772,9 @@ export default function Dashboard() {
                             <div
                               className={`w-2 h-2 rounded-full ${item.dotColor}`}
                             ></div>
-                            <span className="text-xs font-mono text-text-muted tracking-tighter uppercase font-semibold">
+                            {/* <span className="text-xs font-mono text-text-muted tracking-tighter uppercase font-semibold">
                               {item.time}
-                            </span>
+                            </span> */}
                           </div>
                           <div className="lg:col-span-6">
                             <p className="text-sm font-medium text-text-charcoal flex items-center gap-2">
