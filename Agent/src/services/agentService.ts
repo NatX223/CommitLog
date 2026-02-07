@@ -102,7 +102,7 @@ export async function hourlyPosts() {
             tools: {
                 getLatestCommits,
                 // postTweet,
-                recordHistory
+                // recordHistory
             },
         });
 
@@ -170,7 +170,7 @@ export async function weeklyPosts() {
       });
     
       sdk.start();
-      
+
       const userId = post.userId;
       const repo = post.repo;
 
@@ -215,7 +215,7 @@ export async function weeklyPosts() {
             tools: {
                 getLatestCommits,
                 // postTweet,
-                recordHistory
+                // recordHistory
             },
         });
 
