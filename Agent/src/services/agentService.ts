@@ -101,8 +101,8 @@ export async function hourlyPosts() {
             // 4. Tool Definitions
             tools: {
                 getLatestCommits,
-                // postTweet,
-                // recordHistory
+                postTweet,
+                recordHistory
             },
         });
 
@@ -214,8 +214,8 @@ export async function weeklyPosts() {
             // 4. Tool Definitions
             tools: {
                 getLatestCommits,
-                // postTweet,
-                // recordHistory
+                postTweet,
+                recordHistory
             },
         });
 
