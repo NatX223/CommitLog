@@ -27,7 +27,7 @@ interface UserData {
     id?: string;
     content: string;
     link: string;
-    timestamp: Date;
+    timestamp: Date | string; // Allow both Date objects and ISO strings
   }>;
 }
 
@@ -107,7 +107,19 @@ export default function Dashboard() {
 
   // Format timestamp to display time in current timezone
   const formatTimestamp = (timestamp: Date | string) => {
+    // Handle null, undefined, or empty timestamps
+    if (!timestamp) {
+      return "Unknown time";
+    }
+
     const date = new Date(timestamp);
+
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+      console.warn("Invalid timestamp received:", timestamp);
+      return "Invalid time";
+    }
+
     const now = new Date();
     const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
 
@@ -129,23 +141,39 @@ export default function Dashboard() {
 
   // Process history data for activity items
   const activityItems =
-    userData?.history?.map((historyItem, index) => {
-      // Use the actual document ID if available, otherwise fall back to index-based ID
-      const itemId = historyItem.id || `history-${index}`;
-      
-      return {
-        id: itemId,
-        time: formatTimestamp(historyItem.timestamp),
-        // type: "commit",
-        message: historyItem.content,
-        // icon: "commit",
-        iconColor: "text-text-muted",
-        dotColor: "bg-dashboard-primary",
-        links: historyItem.link ? [{ label: "VIEW", url: historyItem.link }] : [],
-        isAgentGenerated: true, // Mark as agent-generated for rating
-        userRating: itemRatings[itemId] || 0,
-      };
-    }) || [];
+    userData?.history
+      ?.map((historyItem, index) => {
+        // Use the actual document ID if available, otherwise fall back to index-based ID
+        const itemId = historyItem.id || `history-${index}`;
+
+        // Debug logging for timestamp issues
+        if (process.env.NODE_ENV === "development") {
+          console.log(`Processing history item ${index}:`, {
+            id: itemId,
+            timestamp: historyItem.timestamp,
+            timestampType: typeof historyItem.timestamp,
+            content: historyItem.content?.substring(0, 50) + "...",
+          });
+        }
+
+        return {
+          id: itemId,
+          time: formatTimestamp(historyItem.timestamp),
+          // type: "commit",
+          message: historyItem.content || "No content available",
+          // icon: "commit",
+          iconColor: "text-text-muted",
+          dotColor: "bg-dashboard-primary",
+          links: historyItem.link
+            ? [{ label: "VIEW", url: historyItem.link }]
+            : [],
+          isAgentGenerated: true, // Mark as agent-generated for rating
+          userRating: itemRatings[itemId] || 0,
+        };
+      })
+      .filter(
+        (item) => item.message && item.message !== "No content available"
+      ) || []; // Filter out items with no content
 
   const integrations = [
     {
@@ -242,7 +270,11 @@ export default function Dashboard() {
       if (response.ok) {
         console.log("Rating submitted successfully");
       } else {
-        console.error("Failed to submit rating", response.status, response.statusText);
+        console.error(
+          "Failed to submit rating",
+          response.status,
+          response.statusText
+        );
         // Don't revert state on API error - keep the UI rating
       }
     } catch (error) {

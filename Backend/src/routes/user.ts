@@ -3,6 +3,7 @@ import { firebaseService } from '../services/firebaseService.js';
 import { userData, userSchedule } from '../models/userSchema.js';
 import { githubService } from '../services/githubService.js';
 import historySchema from '../models/historySchema.js';
+import { Timestamp } from 'firebase-admin/firestore';
 
 const router = express.Router();
 
@@ -35,10 +36,42 @@ router.get('/api/user', async (req, res) => {
         if (hasGithub) {
             userRepos = await githubService.getUserRepositories(userDoc.connectedAccounts?.github?.accessToken!, username);
             userSchedules = await firebaseService.getSubcollectionDocuments<userSchedule>('users', userId, 'schedules');
-            userHistory = await firebaseService.getSubcollectionDocuments<historySchema>('users', userId, 'history');
+            const rawHistory = await firebaseService.getSubcollectionDocuments<historySchema>('users', userId, 'history');
+
+            // Convert Firestore timestamps to ISO strings for frontend compatibility
+            userHistory = rawHistory.map(item => {
+                let timestamp;
+
+                if (item.timestamp && typeof item.timestamp === 'object' && 'toDate' in item.timestamp) {
+                    // Firestore Timestamp object - cast to proper type
+                    try {
+                        timestamp = (item.timestamp as Timestamp).toDate().toISOString();
+                    } catch (error) {
+                        console.warn('Failed to convert Firestore timestamp:', error);
+                        timestamp = new Date().toISOString();
+                    }
+                } else if (item.timestamp) {
+                    // Already a string or Date, validate it
+                    const testDate = new Date(item.timestamp as string | Date);
+                    if (isNaN(testDate.getTime())) {
+                        console.warn('Invalid timestamp found:', item.timestamp);
+                        timestamp = new Date().toISOString();
+                    } else {
+                        timestamp = testDate.toISOString();
+                    }
+                } else {
+                    // No timestamp provided, use current time
+                    timestamp = new Date().toISOString();
+                }
+
+                return {
+                    ...item,
+                    timestamp
+                };
+            });
         }
 
-        
+
         const userData = {
             userId,
             username,
