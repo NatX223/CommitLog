@@ -17,26 +17,6 @@ import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentation
 
 export async function hourlyPosts() {
 
-  const num = randomInt(0, 100000);
-
-  const secureId = num.toString().padStart(5, '0');
-
-  const traceExporter = new OpikExporter({
-    client: opikClient,
-    tags: ["hackathon", "commit-to-change", secureId],
-    metadata: {
-      environment: "production",
-      version: "0.1.0",
-    //   team: "natx223",
-    }
-  });
-
-  const sdk = new NodeSDK({
-    traceExporter: traceExporter,
-    instrumentations: [getNodeAutoInstrumentations()],
-  });
-
-  sdk.start();
   const currentUtcHour = new Date().getUTCHours();
 
   console.log(`⏳ Starting Agent Batch for UTC Hour: ${currentUtcHour}:00`);
@@ -56,6 +36,28 @@ export async function hourlyPosts() {
     console.log(`🚀 Found ${hourPosts.length} posts to process.`);
 
     const promises = hourPosts.map(async (post) => {
+
+      const num = randomInt(0, 100000);
+
+      const secureId = num.toString().padStart(5, '0');
+    
+      const traceExporter = new OpikExporter({
+        client: opikClient,
+        tags: ["hackathon", "commit-to-change", secureId],
+        metadata: {
+          environment: "production",
+          version: "0.1.0",
+        //   team: "natx223",
+        }
+      });
+    
+      const sdk = new NodeSDK({
+        traceExporter: traceExporter,
+        instrumentations: [getNodeAutoInstrumentations()],
+      });
+    
+      sdk.start();
+
       const userId = post.userId;
       const repo = post.repo;
 
@@ -99,7 +101,7 @@ export async function hourlyPosts() {
             // 4. Tool Definitions
             tools: {
                 getLatestCommits,
-                postTweet,
+                // postTweet,
                 recordHistory
             },
         });
@@ -126,26 +128,6 @@ export async function hourlyPosts() {
 }
 
 export async function weeklyPosts() {
-  const num = randomInt(0, 100000);
-
-  const secureId = num.toString().padStart(5, '0');
-
-  const traceExporter = new OpikExporter({
-    client: opikClient,
-    tags: ["hackathon", "commit-to-change", secureId],
-    metadata: {
-      environment: "production",
-      version: "0.1.0",
-    //   team: "natx223",
-    }
-  });
-
-  const sdk = new NodeSDK({
-    traceExporter: traceExporter,
-    instrumentations: [getNodeAutoInstrumentations()],
-  });
-
-  sdk.start();
   const now = DateTime.now().toUTC();
   const currentUtcHour = now.hour;
   const currentDayName = now.weekdayLong;
@@ -168,6 +150,27 @@ export async function weeklyPosts() {
     console.log(`🚀 Found ${weeklyPosts.length} posts to process.`);
 
     const promises = weeklyPosts.map(async (post) => {
+      const num = randomInt(0, 100000);
+
+      const secureId = num.toString().padStart(5, '0');
+    
+      const traceExporter = new OpikExporter({
+        client: opikClient,
+        tags: ["hackathon", "commit-to-change", secureId],
+        metadata: {
+          environment: "production",
+          version: "0.1.0",
+        //   team: "natx223",
+        }
+      });
+    
+      const sdk = new NodeSDK({
+        traceExporter: traceExporter,
+        instrumentations: [getNodeAutoInstrumentations()],
+      });
+    
+      sdk.start();
+      
       const userId = post.userId;
       const repo = post.repo;
 
@@ -211,7 +214,7 @@ export async function weeklyPosts() {
             // 4. Tool Definitions
             tools: {
                 getLatestCommits,
-                postTweet,
+                // postTweet,
                 recordHistory
             },
         });
@@ -223,7 +226,7 @@ export async function weeklyPosts() {
         await sdk.shutdown();
 
       } catch (err) {
-        console.error(`❌ Error in dailyPost for user ${userId}:`, err);
+        console.error(`❌ Error in weekly post for user ${userId}:`, err);
         // Important: We catch here so the loop continues for other users!
       }
     });
