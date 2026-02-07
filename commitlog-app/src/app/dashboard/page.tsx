@@ -41,7 +41,8 @@ export default function Dashboard() {
   const [feedbackModal, setFeedbackModal] = useState({
     isOpen: false,
     itemId: "",
-    currentRating: 0,
+    correctnessScore: 0,
+    featureMatchScore: 0,
   });
   const [itemRatings, setItemRatings] = useState<Record<string, number>>({});
   // const [showSuccess, setShowSuccess] = useState(false);
@@ -142,6 +143,18 @@ export default function Dashboard() {
   // Process history data for activity items
   const activityItems =
     userData?.history
+      ?.sort((a, b) => {
+        // Sort by timestamp, latest first
+        const dateA = new Date(a.timestamp);
+        const dateB = new Date(b.timestamp);
+
+        // Handle invalid dates by putting them at the end
+        if (isNaN(dateA.getTime()) && isNaN(dateB.getTime())) return 0;
+        if (isNaN(dateA.getTime())) return 1;
+        if (isNaN(dateB.getTime())) return -1;
+
+        return dateB.getTime() - dateA.getTime(); // Latest first
+      })
       ?.map((historyItem, index) => {
         // Use the actual document ID if available, otherwise fall back to index-based ID
         const itemId = historyItem.id || `history-${index}`;
@@ -167,8 +180,8 @@ export default function Dashboard() {
           links: historyItem.link
             ? [{ label: "VIEW", url: historyItem.link }]
             : [],
-          isAgentGenerated: true, // Mark as agent-generated for rating
-          userRating: itemRatings[itemId] || 0,
+          isAgentGenerated: true, // Mark as agent-generated for feedback
+          hasFeedback: itemRatings[itemId] ? true : false,
         };
       })
       .filter(
@@ -245,48 +258,11 @@ export default function Dashboard() {
     }
   };
 
-  // Handle rating submission
-  const handleRating = async (itemId: string, score: number) => {
-    try {
-      // Update local state immediately for better UX
-      setItemRatings((prev) => ({ ...prev, [itemId]: score }));
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_AGENT_URL}/api/feedback`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId: userData?.userId,
-            responseId: itemId,
-            score: score / 5, // Convert 1-5 scale to 0-1 scale for backend
-            improvement: "",
-          }),
-        }
-      );
-
-      if (response.ok) {
-        console.log("Rating submitted successfully");
-      } else {
-        console.error(
-          "Failed to submit rating",
-          response.status,
-          response.statusText
-        );
-        // Don't revert state on API error - keep the UI rating
-      }
-    } catch (error) {
-      console.error("Error submitting rating:", error);
-      // Don't revert state on network error - keep the UI rating
-    }
-  };
-
-  // Handle detailed feedback submission
+  // Handle feedback submission with two metrics
   const handleDetailedFeedback = async (
     itemId: string,
-    score: number,
+    correctnessScore: number,
+    featureMatchScore: number,
     improvement: string
   ) => {
     try {
@@ -300,20 +276,28 @@ export default function Dashboard() {
           body: JSON.stringify({
             userId: userData?.userId,
             responseId: itemId,
-            score: score / 5, // Convert 1-5 scale to 0-1 scale for backend
+            correctnessScore: correctnessScore / 5, // Convert 1-5 scale to 0-1 scale for backend
+            featureScore: featureMatchScore / 5, // Convert 1-5 scale to 0-1 scale for backend
             improvement,
           }),
         }
       );
 
       if (response.ok) {
-        console.log("Detailed feedback submitted successfully");
-        setFeedbackModal({ isOpen: false, itemId: "", currentRating: 0 });
+        console.log("Feedback submitted successfully");
+        // Mark item as having feedback
+        setItemRatings((prev) => ({ ...prev, [itemId]: 1 }));
+        setFeedbackModal({
+          isOpen: false,
+          itemId: "",
+          correctnessScore: 0,
+          featureMatchScore: 0,
+        });
       } else {
-        console.error("Failed to submit detailed feedback");
+        console.error("Failed to submit feedback");
       }
     } catch (error) {
-      console.error("Error submitting detailed feedback:", error);
+      console.error("Error submitting feedback:", error);
     }
   };
 
@@ -405,10 +389,6 @@ export default function Dashboard() {
             <h2 className="text-lg font-bold text-text-charcoal">Dashboard</h2>
           </div>
           <div className="flex items-center gap-6">
-            <button className="relative p-2 text-text-muted hover:text-text-charcoal">
-              <span className="material-symbols-outlined">notifications</span>
-              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-dashboard-primary rounded-full"></span>
-            </button>
             <div className="h-8 w-px bg-border-light"></div>
             <button
               onClick={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
@@ -804,9 +784,9 @@ export default function Dashboard() {
                             <div
                               className={`w-2 h-2 rounded-full ${item.dotColor}`}
                             ></div>
-                            {/* <span className="text-xs font-mono text-text-muted tracking-tighter uppercase font-semibold">
+                            <span className="text-xs font-mono text-text-muted tracking-tighter uppercase font-semibold">
                               {item.time}
-                            </span> */}
+                            </span>
                           </div>
                           <div className="lg:col-span-6">
                             <p className="text-sm font-medium text-text-charcoal flex items-center gap-2">
@@ -819,39 +799,24 @@ export default function Dashboard() {
                             </p>
                             {item.isAgentGenerated && (
                               <div className="mt-2 flex items-center gap-2">
-                                <span className="text-xs text-text-muted">
-                                  Rate this post:
-                                </span>
-                                <div className="flex items-center gap-1">
-                                  {[1, 2, 3, 4, 5].map((star) => (
-                                    <button
-                                      key={star}
-                                      onClick={() =>
-                                        handleRating(item.id, star)
-                                      }
-                                      className={`text-sm transition-colors ${
-                                        (item.userRating || 0) >= star
-                                          ? "text-yellow-400 hover:text-yellow-500"
-                                          : "text-gray-300 hover:text-yellow-300"
-                                      }`}
-                                    >
-                                      ★
-                                    </button>
-                                  ))}
-                                </div>
-                                {item.userRating && (
+                                {!item.hasFeedback ? (
                                   <button
                                     onClick={() =>
                                       setFeedbackModal({
                                         isOpen: true,
                                         itemId: item.id,
-                                        currentRating: item.userRating,
+                                        correctnessScore: 0,
+                                        featureMatchScore: 0,
                                       })
                                     }
-                                    className="text-xs text-dashboard-primary hover:underline ml-2"
+                                    className="text-xs text-dashboard-primary hover:underline font-semibold"
                                   >
-                                    Add feedback
+                                    Add Feedback
                                   </button>
+                                ) : (
+                                  <span className="text-xs text-green-600 font-semibold">
+                                    ✓ Feedback provided
+                                  </span>
                                 )}
                               </div>
                             )}
@@ -1158,7 +1123,8 @@ export default function Dashboard() {
                   setFeedbackModal({
                     isOpen: false,
                     itemId: "",
-                    currentRating: 0,
+                    correctnessScore: 0,
+                    featureMatchScore: 0,
                   })
                 }
                 className="p-2 text-text-muted hover:text-text-charcoal hover:bg-slate-50 rounded-lg transition-all"
@@ -1167,11 +1133,14 @@ export default function Dashboard() {
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div>
-                <label className="block text-sm font-semibold text-text-charcoal mb-2">
-                  Your Rating
+                <label className="block text-sm font-semibold text-text-charcoal mb-3">
+                  Correctness Score
                 </label>
+                <p className="text-xs text-text-muted mb-2">
+                  How accurate and factually correct is this post?
+                </p>
                 <div className="flex items-center gap-1">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
@@ -1179,20 +1148,53 @@ export default function Dashboard() {
                       onClick={() =>
                         setFeedbackModal((prev) => ({
                           ...prev,
-                          currentRating: star,
+                          correctnessScore: star,
                         }))
                       }
                       className={`text-xl transition-colors ${
-                        feedbackModal.currentRating >= star
-                          ? "text-yellow-400 hover:text-yellow-500"
-                          : "text-gray-300 hover:text-yellow-300"
+                        feedbackModal.correctnessScore >= star
+                          ? "text-blue-400 hover:text-blue-500"
+                          : "text-gray-300 hover:text-blue-300"
                       }`}
                     >
                       ★
                     </button>
                   ))}
                   <span className="ml-2 text-sm text-text-muted">
-                    {feedbackModal.currentRating}/5
+                    {feedbackModal.correctnessScore}/5
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-text-charcoal mb-3">
+                  Feature Match Score
+                </label>
+                <p className="text-xs text-text-muted mb-2">
+                  How well does this post match the features you actually worked
+                  on?
+                </p>
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      onClick={() =>
+                        setFeedbackModal((prev) => ({
+                          ...prev,
+                          featureMatchScore: star,
+                        }))
+                      }
+                      className={`text-xl transition-colors ${
+                        feedbackModal.featureMatchScore >= star
+                          ? "text-green-400 hover:text-green-500"
+                          : "text-gray-300 hover:text-green-300"
+                      }`}
+                    >
+                      ★
+                    </button>
+                  ))}
+                  <span className="ml-2 text-sm text-text-muted">
+                    {feedbackModal.featureMatchScore}/5
                   </span>
                 </div>
               </div>
@@ -1215,7 +1217,8 @@ export default function Dashboard() {
                     setFeedbackModal({
                       isOpen: false,
                       itemId: "",
-                      currentRating: 0,
+                      correctnessScore: 0,
+                      featureMatchScore: 0,
                     })
                   }
                   className="flex-1 py-2 px-4 rounded-lg border border-border-light text-text-muted font-semibold hover:bg-slate-50 transition-all"
@@ -1229,11 +1232,16 @@ export default function Dashboard() {
                     ) as HTMLTextAreaElement;
                     handleDetailedFeedback(
                       feedbackModal.itemId,
-                      feedbackModal.currentRating,
+                      feedbackModal.correctnessScore,
+                      feedbackModal.featureMatchScore,
                       textarea.value
                     );
                   }}
-                  className="flex-1 py-2 px-4 rounded-lg bg-dashboard-primary text-white font-semibold hover:opacity-90 transition-all"
+                  disabled={
+                    feedbackModal.correctnessScore === 0 ||
+                    feedbackModal.featureMatchScore === 0
+                  }
+                  className="flex-1 py-2 px-4 rounded-lg bg-dashboard-primary text-white font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Submit Feedback
                 </button>

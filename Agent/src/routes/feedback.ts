@@ -44,7 +44,7 @@ router.post('/api/feedback', async (req, res) => {
         const commitLogDataset = await opikClient.getDataset<DatasetItem>("commitlog-baseline");
 
         opikClient.logTracesFeedbackScores([
-          { id: traceIds[0].id!, name: "correctnes", value: correctnessScore },
+          { id: traceIds[0].id!, name: "correctness", value: correctnessScore },
           { id: traceIds[0].id!, name: "feature match", value: featureScore }
         ]);
 

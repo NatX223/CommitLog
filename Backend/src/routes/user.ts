@@ -68,6 +68,11 @@ router.get('/api/user', async (req, res) => {
                     ...item,
                     timestamp
                 };
+            }).sort((a, b) => {
+                // Sort by timestamp, latest first
+                const dateA = new Date(a.timestamp);
+                const dateB = new Date(b.timestamp);
+                return dateB.getTime() - dateA.getTime();
             });
         }
 
