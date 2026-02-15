@@ -1,7 +1,5 @@
 # CommitLog
 
-# FlareSec
-
 Your build in public co-pilot
 
 ---
