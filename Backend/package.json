@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts",
+    "dev:signups": "tsx watch src/scripts/sendBulkEmails.ts",
     "build": "tsc",
     "test": "jest"
   },
@@ -22,6 +23,7 @@
     "luxon": "^3.7.2",
     "node-cron": "^3.0.2",
     "opik": "^1.9.103",
+    "resend": "^6.9.1",
     "twitter-api-v2": "^1.29.0"
   },
   "devDependencies": {

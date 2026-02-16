@@ -3,3 +3,11 @@ Backend/package-lock.json
 Backend/package-lock.json
 Agent/src/getTraces.ts
 Agent/src/routes/userScore.ts
+Backend/src/routes/bulkEmail.ts
+Backend/src/scripts/sendBulkEmails.ts
+Backend/src/scripts/sendPowerUserEmails.ts
+Backend/src/services/bulkEmailService.ts
+Backend/src/services/powerUserEmail.ts
+Backend/src/services/powerUserEmailService.ts
+Backend/src/services/signUpEmail.ts
+Backend/src/services/userEmail.ts
