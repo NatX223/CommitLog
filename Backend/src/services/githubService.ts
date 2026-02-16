@@ -108,7 +108,7 @@ export class GitHubService {
           "Accept": "application/vnd.github.v3+json"
         },
         params: {
-          type: 'public',
+          type: 'all',
           sort: 'updated',
           per_page: 20 // Get up to 20 repositories
         }
